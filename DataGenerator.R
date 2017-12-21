@@ -1,11 +1,14 @@
-install.packages("chron");
+install.packages("chron")
 install.packages("clusterGeneration")
+install.packages("lubridate")
 install.packages("dbscan")
 
 
 library("clusterGeneration")
 library("chron")
 library("dbscan")
+library("lubridate")
+
 
 getTimes <- function(){
   t <- seq(ISOdate(2000,1,1,hour = 10), ISOdate(2000,12,31, hour =24), "hours");
@@ -111,6 +114,18 @@ createMealsDrinks = function(customers){ #parameters are not necessary (?)
   }))
   
   return(data.frame(avgmeals, avgdrinks))
+}
+
+#creates the season (1-4) for every timestamp and returns it as a vector
+createseason = function(dates){
+  moy <- month(dates)
+  soy <- sapply(moy, function(x){
+    if (2 < x && x < 6){1}
+    else if (5 < x && x < 9){2}
+    else if (8 < x && x < 12){3}
+    else if(11 < x || x < 3){4}
+    })
+  return (unlist(soy))
 }
 
 #####################################################end of functions###########################################

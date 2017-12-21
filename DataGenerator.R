@@ -9,6 +9,8 @@ getTimes <- function(){
   t[hours(t)>=10]
 }
 
+#creates bimodal random values by merging two sets of randonly normal distributed values
+#n = number of values, cpct = 0.5 (probability of choosing of one of the sets)
 bimodalDistFunc <- function (n,cpct, mu1, mu2, sig1, sig2) {
   y0 <- rnorm(n,mean=mu1, sd = sig1)
   y1 <- rnorm(n,mean=mu2, sd = sig2)
@@ -17,7 +19,8 @@ bimodalDistFunc <- function (n,cpct, mu1, mu2, sig1, sig2) {
   y <- y0*(1 - flag) + y1*flag 
 }
 
-sortbimodaldata = function(x){
+#cut off the values which are not in the range of 10 and 23
+sortbimodaldata = function(x){ 
   temp = x
   if(max(x) > 23){
     temp = temp[-which(temp>23)]
@@ -27,13 +30,15 @@ sortbimodaldata = function(x){
   return(temp)
 }
 
+#number of customers per day; e.g. (12,12,15,16,11,...)
 createCustomerPerDay = function(n,cpct, mu1, mu2, sig1, sig2){
   data = bimodalDistFunc(n,cpct, mu1, mu2, sig1, sig2)
-  floordata = floor(data)
-  sorteddata = sortbimodaldata(floordata)
+  floordata = floor(data) #round down
+  sorteddata = sortbimodaldata(floordata) #cut off data in range 10 to 23
   return(sorteddata)
 }
 
+#output: 14 rows of distribution for one day (10,20,21,44,75,54,...) without the time. Maximum capacity of 60.
 createCustomerTimeFrequency = function(n,cpct, mu1, mu2, sig1, sig2){
   allcustomers = as.data.frame(table(createCustomerPerDay(n,cpct, mu1, mu2, sig1, sig2)))
   freq = c()
@@ -51,10 +56,11 @@ createCustomerTimeFrequency = function(n,cpct, mu1, mu2, sig1, sig2){
   return(freq)
 }
 
+#Doing the previous function 365 times. Returns the whole customers data (365 days and 14 entries a day)
 createAllCustomers = function(cpct, mu1, mu2, sig1, sig2){
   customers = c()
   for(i in 1:366){
-    n = floor(runif(1, 150, 250))
+    n = floor(runif(1, 150, 250)) #randomly choose a number of customer for a day
     customers = append(customers, createCustomerTimeFrequency(n,cpct, mu1, mu2, sig1, sig2))
   }
   return(customers)

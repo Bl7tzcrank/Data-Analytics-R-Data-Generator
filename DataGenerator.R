@@ -1,8 +1,11 @@
 install.packages("chron");
 install.packages("clusterGeneration")
+install.packages("dbscan")
+
 
 library("clusterGeneration")
-library("chron");
+library("chron")
+library("dbscan")
 
 getTimes <- function(){
   t <- seq(ISOdate(2000,1,1,hour = 10), ISOdate(2000,12,31, hour =24), "hours");
@@ -66,7 +69,7 @@ createAllCustomers = function(cpct, mu1, mu2, sig1, sig2){
   return(customers)
 }
 
-createMealsDrinks = function(timeslots,customers){
+createMealsDrinks = function(customers){ #parameters are not necessary (?)
   meals = c()
   drinks = c()
   
@@ -80,7 +83,7 @@ createMealsDrinks = function(timeslots,customers){
   
   meals=mealsDrinks[,1]*customers
   drinks=mealsDrinks[,2]*customers
-  
+  data = data.frame(meals, drinks)
   #normal distribution
   #meals = c(rnorm(length(timeslots),5,1),rnorm(length(timeslots),2,0.5))*customers
   #drinks = c(rnorm(length(timeslots),2,0.8),rnorm(length(timeslots),10,1.5))*customers
@@ -91,7 +94,23 @@ createMealsDrinks = function(timeslots,customers){
   #  meals = append(meals,floor(customers[i]*(runif(1,ranges[2],ranges[3]))*(runif(1,0.6,1.4))))
   #  drinks = append(drinks,floor(customers[i]*(runif(1,ranges[4],ranges[5]))*(runif(1,0.6,1.4))))
   #}
-  data.frame(meals,drinks)
+  avgmeals = unlist(sapply(1:NROW(data), function(x){
+    if(customers[x] == 0){
+      return(0)
+    } else {
+      return(data[x,1]/customers[x])
+    }
+  }))
+  
+  avgdrinks = unlist(sapply(1:NROW(data), function(x){
+    if(customers[x] == 0){
+      return(0)
+    } else {
+      return(data[x,2]/customers[x])
+    }
+  }))
+  
+  return(data.frame(avgmeals, avgdrinks))
 }
 
 #####################################################end of functions###########################################
@@ -113,12 +132,8 @@ MDRangeMatrix = matrix(c(10,4,6,0,2,11,4,6,0,2,12,4,6,0,2,13,4,6,0,2,14,4,5,0,1,
 allcustomers = createAllCustomers(cpct, mu1, mu2, sig1, sig2)
 times = getTimes()
 timeandcustomers = data.frame(times, allcustomers)
-timeslots = as.numeric(substr(timeandcustomers$times,12,13))
+#timeslots = as.numeric(substr(timeandcustomers$times,12,13))
 
 
-merke = createMealsDrinks(timeslots,timeandcustomers[,2])
-plot(merke)
-test = merke/timeandcustomers[,2]
-test2 = test[which(complete.cases(test)),]
-plot(test2)
-dbscan::dbscan(test2,0.3)
+mealsanddrinks = createMealsDrinks(timeandcustomers[,2])
+

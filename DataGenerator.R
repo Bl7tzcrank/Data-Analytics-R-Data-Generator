@@ -128,6 +128,12 @@ createseason = function(dates){
   return (unlist(soy))
 }
 
+#creates number of times the door was opened
+createopendoors = function(customers, daytimes){
+  
+  ##mapply(function(x,y){x-y}, x1,y1)
+}
+
 #####################################################end of functions###########################################
 
 #####################################################begin of data instances###########################################

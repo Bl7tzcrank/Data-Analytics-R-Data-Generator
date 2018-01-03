@@ -165,9 +165,6 @@ createGas = function(numberofmeals,customers){
   return(gas)
 }
 
-<<<<<<< HEAD
-#computes the ampunt of water used per hour (liters); depends on numberofmeals*numberofcustomers; input mealsanddrinks[,1]
-=======
 
 #generates the average age of the customers for each hour.
 #Assumption: younger people visit our restaurant rather late in comparison to older people.
@@ -198,7 +195,7 @@ createAverageAge = function(customers){
   })))
 }
 
->>>>>>> 7684e518be080c61915730eaec7f7153ec055817
+#computes the ampunt of water used per hour (liters); depends on numberofmeals*numberofcustomers; input mealsanddrinks[,1]
 createWater = function(numberofmeals,customers){
   
   water <- mapply(function(x,y){
@@ -210,7 +207,6 @@ createWater = function(numberofmeals,customers){
   
 }
 
-<<<<<<< HEAD
 #computes the ampunt of electricity used per hour (kwh); depends on numberofmeals*numberofcustomers and weather outside; input mealsanddrinks[,1]
 createElectricity = function(numberofmeals,customers,weather){
   
@@ -228,11 +224,6 @@ createElectricity = function(numberofmeals,customers,weather){
   return (electricitycooking+electricityheating)
 }
 
-<<<<<<< HEAD
-=======
->>>>>>> 6f961111779f426efa20497e03c435d435d957bd
-=======
->>>>>>> 141d40c7c816a53ca24197caff8cee9e82f924ac
 #calculates restaurant temperature
 #Reasoning: The temperature restaurant depends on the number of guests and how often the door was opened.
 #The assumption is, that the if the door is opened, there is a negative effect on the restaurant temperature. Therefore the temperature decreases
@@ -252,6 +243,22 @@ get_restaurant_temperature = function(number_of_customers,doors_opened){
 get_tips = function(number_of_customers,average_age){
   tips = round((rnorm(length(number_of_customers),average_tip,variance_tip)+additional_tips_average_age*(average_age/max_age)),2)*number_of_customers 
 }
+<<<<<<< HEAD
+  
+#calculates revenue
+#Reasoning: 
+get_revenues = function(number_of_meals, number_of_drinks, cash_payments, card_payments){
+  revenue_meals = rnorm(length(number_of_meals),average_price_meal,variance_meal_price)*number_of_meals
+  revenue_drinks = rnorm(length(number_of_drinks),average_price_drink,variance_drink_price)*number_of_drinks
+  
+  if(cash_payments<card_payments){
+    revenue_meals = revenue_meals * runif(length(revenue_meals),min_revenue_percentage_boost,max_revenue_percentage_boost)
+    revenue_drinks = revenue_drinks * runif(length(revenue_drinks),min_revenue_percentage_boost,max_revenue_percentage_boost)
+  }
+  return(data.frame(revenue_meals,revenue_drinks))
+}
+=======
+>>>>>>> 39112f33ce1dee99f082519fb3dbd052142c33f2
 
 #####################################################end of functions###########################################
 
@@ -276,6 +283,14 @@ average_tip = 2.5
 variance_tip = 1
 additional_tips_average_age = 2
 max_age = 85
+
+#parameters_revenue
+average_price_meal = 15.0
+variance_meal_price = 6.0
+average_price_drink = 4.0
+variance_drink_price = 2.0
+max_revenue_percentage_boost = 0.2
+min_revenue_percentage_boost = 0.1
 
 MDRangeMatrix = matrix(c(10,4,6,0,2,11,4,6,0,2,12,4,6,0,2,13,4,6,0,2,14,4,5,0,1,15,0,2,6,8,16,0,2,6,8,17,0,2,6,8,18,4,6,1,2,19,4,6,1,2,20,4,6,1,2,21,0,2,7,10,22,0,2,7,10,23,0,2,7,10), nrow = 14, ncol = 5, byrow = TRUE )
 

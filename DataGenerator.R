@@ -144,6 +144,32 @@ createOpendoors = function(customers){
   return (opendoors)
 }
 
+<<<<<<< HEAD
+#computes the amount of gas used per hour (kwh); depends on numberofmeals*numberofcustomers; input mealsanddrinks[,1]
+createGas = function(numberofmeals,customers){
+  
+  gas <- mapply(function(x,y){
+    
+    (abs(round(rnorm(1,mean=x*y*500,sd=1000)))+1)^(1/2)
+  }, numberofmeals,customers)
+  
+  return(gas)
+}
+
+createWater = function(numberofmeals,customers){
+  
+  water <- mapply(function(x,y){
+    
+    (abs(round(rnorm(1,mean=x*y*10,sd=10)))+1)^(2/3)
+  }, numberofmeals,customers)
+  
+  return(water)
+  
+}
+
+<<<<<<< HEAD
+=======
+>>>>>>> 6f961111779f426efa20497e03c435d435d957bd
 #calculates restaurant temperature
 #Reasoning: The temperature restaurant depends on the number of guests and how often the door was opened.
 #The assumption is, that the if the door is opened, there is a negative effect on the restaurant temperature. Therefore the temperature decreases

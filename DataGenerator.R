@@ -128,12 +128,18 @@ createseason = function(dates){
 }
 
 #creates number of times the door was opened
-createopendoors = function(customers, daytimes){
+createOpendoors = function(customers){
   
-  ##mapply(function(x,y){x-y}, x1,y1)
+  opendoors <- sapply(customers,function(x){
+    
+    (abs(round(rnorm(1,mean=x, sd = 2)))+1)*2
+    
+    })
+  return (opendoors)
 }
 
 
+<<<<<<< HEAD
 #calculates restaurant temperature
 #OPEN:adjustment of 
 get_restaurant_temperature = function(number_of_customers,doors_opened){
@@ -141,6 +147,8 @@ get_restaurant_temperature = function(number_of_customers,doors_opened){
   return(temperature)
 }
 
+=======
+>>>>>>> 3908ee03204623e0ff66d1879fd9f79ecf222ba9
 #####################################################end of functions###########################################
 
 #####################################################begin of data instances###########################################

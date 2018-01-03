@@ -144,21 +144,39 @@ createGas = function(numberofmeals,customers){
   
   gas <- mapply(function(x,y){
     
-    (abs(round(rnorm(1,mean=x*y*500,sd=1000)))+1)^(1/2)
+    (abs(round(rnorm(1,mean=x*y*500,sd=1000))))^(1/2)
   }, numberofmeals,customers)
   
   return(gas)
 }
 
+#computes the ampunt of water used per hour (liters); depends on numberofmeals*numberofcustomers; input mealsanddrinks[,1]
 createWater = function(numberofmeals,customers){
   
   water <- mapply(function(x,y){
     
-    (abs(round(rnorm(1,mean=x*y*10,sd=10)))+1)^(2/3)
+    (abs(round(rnorm(1,mean=x*y*10,sd=10))))^(2/3)
   }, numberofmeals,customers)
   
   return(water)
   
+}
+
+#computes the ampunt of electricity used per hour (kwh); depends on numberofmeals*numberofcustomers and weather outside; input mealsanddrinks[,1]
+createElectricity = function(numberofmeals,customers,weather){
+  
+  electricitycooking <- mapply(function(x,y){
+    
+    (abs(round(rnorm(1,mean=x*y*100000,sd=500000))))^(1/3)
+  }, numberofmeals,customers)
+  # 1 kwh per degree lower then 20
+  electricityheating <- sapply(weather, function(x){
+    if(x < 20){
+      (20-x)*1
+    }
+  })
+  
+  return (electricitycooking+electricityheating)
 }
 
 <<<<<<< HEAD

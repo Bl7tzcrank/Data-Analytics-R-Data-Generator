@@ -30,7 +30,7 @@ bimodalDistFunc <- function (n,cpct, mu1, mu2, sig1, sig2) {
 }
 
 #cut off the values which are not in the range of 10 and 23
-sortbimodaldata = function(x){ 
+filterbimodaldata = function(x){ 
   temp = x
   if(max(x) > 23){
     temp = temp[-which(temp>23)]
@@ -121,7 +121,7 @@ createMealsDrinks = function(customers){ #parameters are not necessary (?)
 }
 
 #creates the season (1-4) for every timestamp and returns it as a vector
-createseason = function(dates){
+createSeason = function(dates){
   moy <- month(dates)
   soy <- sapply(moy, function(x){
     if (2 < x && x < 6){1}
@@ -154,7 +154,40 @@ createGas = function(numberofmeals,customers){
   return(gas)
 }
 
+<<<<<<< HEAD
 #computes the ampunt of water used per hour (liters); depends on numberofmeals*numberofcustomers; input mealsanddrinks[,1]
+=======
+
+#generates the average age of the customers for each hour.
+#Assumption: younger people visit our restaurant rather late in comparison to older people.
+createAverageAge = function(customers){
+  numberofentries = NROW(customers)
+  
+  return(unlist(sapply(1:numberofentries, function(x){
+    if(customers[x] == 0){
+      return(NA)  
+      #next
+    }
+    
+    if(x%%14 == 0){
+      return(mean(rnorm(customers[x],mean=25, sd = sqrt(10))))
+    } 
+    else if(0 < x%%14 && x%%14 < 5){
+      return(mean(rnorm(customers[x],mean=50, sd = sqrt(35))))
+    } 
+    else if(4 < x%%14 && x%%14 < 9){
+      return(mean(rnorm(customers[x],mean=25, sd = sqrt(10))))
+    } 
+    else if(8 < x%%14 && x%%14 < 12){
+      return(mean(rnorm(customers[x],mean=40, sd = sqrt(15))))
+    } 
+    else if(11 < x%%14 && x%%14 < 14){
+      return(mean(rnorm(customers[x],mean=30, sd = sqrt(15))))
+    }
+  })))
+}
+
+>>>>>>> 7684e518be080c61915730eaec7f7153ec055817
 createWater = function(numberofmeals,customers){
   
   water <- mapply(function(x,y){
@@ -208,7 +241,7 @@ get_restaurant_temperature = function(number_of_customers,doors_opened){
 get_tips = function(number_of_customers,average_age){
   tips = round((rnorm(length(number_of_customers),average_tip,variance_tip)+additional_tips_average_age*(average_age/max_age)),2)*number_of_customers 
 }
-  
+
 #####################################################end of functions###########################################
 
 #####################################################begin of data instances###########################################
@@ -240,9 +273,11 @@ MDRangeMatrix = matrix(c(10,4,6,0,2,11,4,6,0,2,12,4,6,0,2,13,4,6,0,2,14,4,5,0,1,
 #####################################################begin of main part###########################################
 
 allcustomers = createAllCustomers(cpct, mu1, mu2, sig1, sig2)
+
 times = getTimes()
 timeandcustomers = data.frame(times, allcustomers)
 #timeslots = as.numeric(substr(timeandcustomers$times,12,13))
+averageAge = createAverageAge(allcustomers)
 doors_opened = createOpendoors(timeandcustomers[,2])
 temperature = get_restaurant_temperature(timeandcustomers[,2],doors_opened)
 mealsanddrinks = createMealsDrinks(timeandcustomers[,2])

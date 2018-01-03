@@ -5,10 +5,9 @@ install.packages("dbscan")
 
 
 library("clusterGeneration")
-library("chron")
 library("dbscan")
 library("lubridate")
-
+library("chron")
 
 getTimes <- function(){
   t <- seq(ISOdate(2000,1,1,hour = 10), ISOdate(2000,12,31, hour =24), "hours")
@@ -134,6 +133,14 @@ createopendoors = function(customers, daytimes){
   ##mapply(function(x,y){x-y}, x1,y1)
 }
 
+
+#calculates restaurant temperature
+#OPEN:adjustment of 
+get_restaurant_temperature = function(number_of_customers,doors_opened){
+  temperature = x1*number_of_customers^3 - x2*number_of_customers^2 - y1*doors_opened^2 + minimum_temperature
+  return(temperature)
+}
+
 #####################################################end of functions###########################################
 
 #####################################################begin of data instances###########################################
@@ -143,6 +150,11 @@ sig1 <- 1.5
 sig2 <- 1.5
 cpct <- 0.5 
 n = floor(runif(1, 150, 250))
+#parameters_restaurant_temperature
+minimum_temperature = 18.0
+x1 = 0.001
+x2 = 0.01
+y1 = 0.1
 
 MDRangeMatrix = matrix(c(10,4,6,0,2,11,4,6,0,2,12,4,6,0,2,13,4,6,0,2,14,4,5,0,1,15,0,2,6,8,16,0,2,6,8,17,0,2,6,8,18,4,6,1,2,19,4,6,1,2,20,4,6,1,2,21,0,2,7,10,22,0,2,7,10,23,0,2,7,10), nrow = 14, ncol = 5, byrow = TRUE )
 
@@ -155,5 +167,6 @@ times = getTimes()
 timeandcustomers = data.frame(times, allcustomers)
 #timeslots = as.numeric(substr(timeandcustomers$times,12,13))
 
+plot(get_restaurant_temperature(timeandcustomers[,2],timeandcustomers[,2]))
 
 mealsanddrinks = createMealsDrinks(timeandcustomers[,2])

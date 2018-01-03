@@ -157,5 +157,3 @@ timeandcustomers = data.frame(times, allcustomers)
 
 
 mealsanddrinks = createMealsDrinks(timeandcustomers[,2])
-
-plot(mealsanddrinks[,1],mealsanddrinks[,2])

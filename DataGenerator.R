@@ -163,25 +163,49 @@ createAverageAge = function(customers){
   return(unlist(sapply(1:numberofentries, function(x){
     if(customers[x] == 0){
       return(NA)  
-      #next
     }
     
     if(x%%14 == 0){
-      return(mean(rnorm(customers[x],mean=25, sd = sqrt(10))))
+      return(floor(mean(rnorm(customers[x],mean=25, sd = sqrt(10)))))
     } 
     else if(0 < x%%14 && x%%14 < 5){
-      return(mean(rnorm(customers[x],mean=50, sd = sqrt(35))))
+      return(floor(mean(rnorm(customers[x],mean=50, sd = sqrt(35)))))
     } 
     else if(4 < x%%14 && x%%14 < 9){
-      return(mean(rnorm(customers[x],mean=25, sd = sqrt(10))))
+      return(floor(mean(rnorm(customers[x],mean=25, sd = sqrt(10)))))
     } 
     else if(8 < x%%14 && x%%14 < 12){
-      return(mean(rnorm(customers[x],mean=40, sd = sqrt(15))))
+      return(floor(mean(rnorm(customers[x],mean=40, sd = sqrt(15)))))
     } 
     else if(11 < x%%14 && x%%14 < 14){
-      return(mean(rnorm(customers[x],mean=30, sd = sqrt(15))))
+      return(floor(mean(rnorm(customers[x],mean=30, sd = sqrt(15)))))
     }
   })))
+}
+
+#creates the number of paymentmethods per hour. Assumption:
+#older people tend to pay cash and younger people with cards.
+createPaymentMethods = function(customers, customerages){
+  maxAge = max(customerages[-which(is.na(customerages))])
+  card = c()
+  cash = c()
+  
+  for(i in 1:length(customers)){
+    if(customers[i] == 0){
+      card = append(card, 0)
+      cash = append(cash, 0)
+    } else {
+      weight = customerages[i]/maxAge
+      if(weight > 0.2){
+        weight = weight - 0.2
+      }
+      card0_cash1 = rbinom(customers[i],size=1,prob=weight)
+      card = append(card, length(card0_cash1[which(card0_cash1 == 0)]))
+      cash = append(cash, length(card0_cash1[which(card0_cash1 == 1)]))
+    }
+  }
+  
+  return(data.frame("card" = card, "cash" = cash))
 }
 
 #computes the ampunt of water used per hour (liters); depends on numberofmeals*numberofcustomers; input mealsanddrinks[,1]
@@ -232,7 +256,6 @@ get_restaurant_temperature = function(number_of_customers,doors_opened){
 get_tips = function(number_of_customers,average_age){
   tips = round((rnorm(length(number_of_customers),average_tip,variance_tip)+additional_tips_average_age*(average_age/max_age)),2)*number_of_customers 
 }
-<<<<<<< HEAD
   
 #calculates revenue
 #Reasoning: 
@@ -246,8 +269,6 @@ get_revenues = function(number_of_meals, number_of_drinks, cash_payments, card_p
   }
   return(data.frame(revenue_meals,revenue_drinks))
 }
-=======
->>>>>>> 39112f33ce1dee99f082519fb3dbd052142c33f2
 
 #####################################################end of functions###########################################
 
@@ -288,11 +309,13 @@ MDRangeMatrix = matrix(c(10,4,6,0,2,11,4,6,0,2,12,4,6,0,2,13,4,6,0,2,14,4,5,0,1,
 #####################################################begin of main part###########################################
 
 allcustomers = createAllCustomers(cpct, mu1, mu2, sig1, sig2)
-
 times = getTimes()
 timeandcustomers = data.frame(times, allcustomers)
 #timeslots = as.numeric(substr(timeandcustomers$times,12,13))
 averageAge = createAverageAge(allcustomers)
+paymentmethods = createPaymentMethods(allcustomers, averageAge)
 doors_opened = createOpendoors(timeandcustomers[,2])
 temperature = get_restaurant_temperature(timeandcustomers[,2],doors_opened)
 mealsanddrinks = createMealsDrinks(timeandcustomers[,2])
+
+

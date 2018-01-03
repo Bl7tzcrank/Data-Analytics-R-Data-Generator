@@ -132,16 +132,17 @@ createSeason = function(dates){
   return (unlist(soy))
 }
 
-#create the temperature outside based on season 1-4, 14 hours a day
+#create the temperature outside based on seasons 1-4, 14 hours a day
 createWeather = function(times,season){
-  Weather <- mapply(function (x,y){
-    if () {
-      
-    }
+  doy <- unique(as.numeric(strftime(times,format = "%j")))
+  YearWeather <- sapply(list, function)
+
   },times,season)
                   
 return(Weather)                    
 }
+
+
 
 #creates number of times the door was opened
 createOpendoors = function(customers){

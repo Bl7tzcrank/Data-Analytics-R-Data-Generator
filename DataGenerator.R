@@ -185,6 +185,19 @@ get_tips = function(number_of_customers,average_age){
   tips = round((rnorm(length(number_of_customers),average_tip,variance_tip)+additional_tips_average_age*(average_age/max_age)),2)*number_of_customers 
 }
   
+#calculates revenue
+#Reasoning: 
+get_revenues = function(number_of_meals, number_of_drinks, cash_payments, card_payments){
+  revenue_meals = rnorm(length(number_of_meals),average_price_meal,variance_meal_price)*number_of_meals
+  revenue_drinks = rnorm(length(number_of_drinks),average_price_drink,variance_drink_price)*number_of_drinks
+  
+  if(cash_payments<card_payments){
+    revenue_meals = revenue_meals * runif(length(revenue_meals),min_revenue_percentage_boost,max_revenue_percentage_boost)
+    revenue_drinks = revenue_drinks * runif(length(revenue_drinks),min_revenue_percentage_boost,max_revenue_percentage_boost)
+  }
+  return(data.frame(revenue_meals,revenue_drinks))
+}
+
 #####################################################end of functions###########################################
 
 #####################################################begin of data instances###########################################
@@ -208,6 +221,14 @@ average_tip = 2.5
 variance_tip = 1
 additional_tips_average_age = 2
 max_age = 85
+
+#parameters_revenue
+average_price_meal = 15.0
+variance_meal_price = 6.0
+average_price_drink = 4.0
+variance_drink_price = 2.0
+max_revenue_percentage_boost = 0.2
+min_revenue_percentage_boost = 0.1
 
 MDRangeMatrix = matrix(c(10,4,6,0,2,11,4,6,0,2,12,4,6,0,2,13,4,6,0,2,14,4,5,0,1,15,0,2,6,8,16,0,2,6,8,17,0,2,6,8,18,4,6,1,2,19,4,6,1,2,20,4,6,1,2,21,0,2,7,10,22,0,2,7,10,23,0,2,7,10), nrow = 14, ncol = 5, byrow = TRUE )
 

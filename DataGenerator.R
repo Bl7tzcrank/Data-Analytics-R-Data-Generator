@@ -3,17 +3,16 @@ install.packages("clusterGeneration")
 install.packages("lubridate")
 install.packages("dbscan")
 
-
-install.packages("plotly")
-install.packages("ggplot2")
+#install.packages("plotly")
+#install.packages("ggplot2")
 
 
 library("clusterGeneration")
 library("dbscan")
 library("lubridate")
 library("chron")
-library("ggplot2")
-library("plotly")
+#library("ggplot2")
+#library("plotly")
 
 getTimes <- function(){
   t <- seq(ISOdate(2000,1,1,hour = 10), ISOdate(2000,12,31, hour =24), "hours")
@@ -179,6 +178,13 @@ get_restaurant_temperature = function(number_of_customers,doors_opened){
   return(round(temperature,1))
 }
 
+#calculates tips_earned
+#Reasoning:The tips of course heavily depend on the number of customers. In addition the older the customers, the higher the average tip.
+#NOT TESTED YET:WAITING FOR AGE IMPLEMENTATION
+get_tips = function(number_of_customers,average_age){
+  tips = round((rnorm(length(number_of_customers),average_tip,variance_tip)+additional_tips_average_age*(average_age/max_age)),2)*number_of_customers 
+}
+  
 #####################################################end of functions###########################################
 
 #####################################################begin of data instances###########################################
@@ -196,6 +202,12 @@ weight_factor_opened_doors = 0.55
 x1 = 0.001
 x2 = 0.025
 y1 = -0.0025
+
+#parameters_tips
+average_tip = 2.5
+variance_tip = 1
+additional_tips_average_age = 2
+max_age = 85
 
 MDRangeMatrix = matrix(c(10,4,6,0,2,11,4,6,0,2,12,4,6,0,2,13,4,6,0,2,14,4,5,0,1,15,0,2,6,8,16,0,2,6,8,17,0,2,6,8,18,4,6,1,2,19,4,6,1,2,20,4,6,1,2,21,0,2,7,10,22,0,2,7,10,23,0,2,7,10), nrow = 14, ncol = 5, byrow = TRUE )
 

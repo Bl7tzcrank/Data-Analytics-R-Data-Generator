@@ -154,9 +154,6 @@ createGas = function(numberofmeals,customers){
   return(gas)
 }
 
-<<<<<<< HEAD
-#computes the ampunt of water used per hour (liters); depends on numberofmeals*numberofcustomers; input mealsanddrinks[,1]
-=======
 
 #generates the average age of the customers for each hour.
 #Assumption: younger people visit our restaurant rather late in comparison to older people.
@@ -187,7 +184,7 @@ createAverageAge = function(customers){
   })))
 }
 
->>>>>>> 7684e518be080c61915730eaec7f7153ec055817
+#computes the ampunt of water used per hour (liters); depends on numberofmeals*numberofcustomers; input mealsanddrinks[,1]
 createWater = function(numberofmeals,customers){
   
   water <- mapply(function(x,y){
@@ -199,7 +196,6 @@ createWater = function(numberofmeals,customers){
   
 }
 
-<<<<<<< HEAD
 #computes the ampunt of electricity used per hour (kwh); depends on numberofmeals*numberofcustomers and weather outside; input mealsanddrinks[,1]
 createElectricity = function(numberofmeals,customers,weather){
   
@@ -217,11 +213,6 @@ createElectricity = function(numberofmeals,customers,weather){
   return (electricitycooking+electricityheating)
 }
 
-<<<<<<< HEAD
-=======
->>>>>>> 6f961111779f426efa20497e03c435d435d957bd
-=======
->>>>>>> 141d40c7c816a53ca24197caff8cee9e82f924ac
 #calculates restaurant temperature
 #Reasoning: The temperature restaurant depends on the number of guests and how often the door was opened.
 #The assumption is, that the if the door is opened, there is a negative effect on the restaurant temperature. Therefore the temperature decreases

@@ -11,7 +11,7 @@ library("lubridate")
 
 
 getTimes <- function(){
-  t <- seq(ISOdate(2000,1,1,hour = 10), ISOdate(2000,12,31, hour =24), "hours");
+  t <- seq(ISOdate(2000,1,1,hour = 10), ISOdate(2000,12,31, hour =24), "hours")
   t[hours(t)>=10]
 }
 
@@ -158,3 +158,4 @@ timeandcustomers = data.frame(times, allcustomers)
 
 mealsanddrinks = createMealsDrinks(timeandcustomers[,2])
 
+plot(mealsanddrinks[,1],mealsanddrinks[,2])

@@ -3,11 +3,16 @@ install.packages("clusterGeneration")
 install.packages("lubridate")
 install.packages("dbscan")
 
+#install.packages("plotly")
+#install.packages("ggplot2")
+
 
 library("clusterGeneration")
 library("dbscan")
 library("lubridate")
 library("chron")
+#library("ggplot2")
+#library("plotly")
 
 getTimes <- function(){
   t <- seq(ISOdate(2000,1,1,hour = 10), ISOdate(2000,12,31, hour =24), "hours")
@@ -138,7 +143,6 @@ createOpendoors = function(customers){
   return (opendoors)
 }
 
-<<<<<<< HEAD
 #computes the amount of gas used per hour (kwh); depends on numberofmeals*numberofcustomers; input mealsanddrinks[,1]
 createGas = function(numberofmeals,customers){
   
@@ -162,6 +166,7 @@ createWater = function(numberofmeals,customers){
   
 }
 
+<<<<<<< HEAD
 #computes the ampunt of electricity used per hour (kwh); depends on numberofmeals*numberofcustomers and weather outside; input mealsanddrinks[,1]
 createElectricity = function(numberofmeals,customers,weather){
   
@@ -182,13 +187,28 @@ createElectricity = function(numberofmeals,customers,weather){
 <<<<<<< HEAD
 =======
 >>>>>>> 6f961111779f426efa20497e03c435d435d957bd
+=======
+>>>>>>> 141d40c7c816a53ca24197caff8cee9e82f924ac
 #calculates restaurant temperature
-#OPEN:adjustment of 
+#Reasoning: The temperature restaurant depends on the number of guests and how often the door was opened.
+#The assumption is, that the if the door is opened, there is a negative effect on the restaurant temperature. Therefore the temperature decreases
+#initially. The more people the more does the temperature increase because the body heat (and also cooked meals) overrules the negative effect of
+#the door.
+#IDEA:How about also including the season. Depending on that there might be a positive or negative effect if the door is opened
 get_restaurant_temperature = function(number_of_customers,doors_opened){
-  temperature = x1*number_of_customers^3 - x2*number_of_customers^2 - y1*doors_opened^2 + minimum_temperature
-  return(temperature)
+  temperature_cust = x1*number_of_customers^3 - x2*number_of_customers^2 + number_of_customers/5 + fixed_temperature_for_cust
+  temperature_OD = y1*doors_opened^2 + fixed_temperature_for_opened_doors
+  temperature = temperature_cust*(1-weight_factor_opened_doors)+temperature_OD*weight_factor_opened_doors
+  return(round(temperature,1))
 }
 
+#calculates tips_earned
+#Reasoning:The tips of course heavily depend on the number of customers. In addition the older the customers, the higher the average tip.
+#NOT TESTED YET:WAITING FOR AGE IMPLEMENTATION
+get_tips = function(number_of_customers,average_age){
+  tips = round((rnorm(length(number_of_customers),average_tip,variance_tip)+additional_tips_average_age*(average_age/max_age)),2)*number_of_customers 
+}
+  
 #####################################################end of functions###########################################
 
 #####################################################begin of data instances###########################################
@@ -198,11 +218,20 @@ sig1 <- 1.5
 sig2 <- 1.5
 cpct <- 0.5 
 n = floor(runif(1, 150, 250))
+
 #parameters_restaurant_temperature
-minimum_temperature = 18.0
+fixed_temperature_for_cust = 18.0
+fixed_temperature_for_opened_doors = 23.0
+weight_factor_opened_doors = 0.55
 x1 = 0.001
-x2 = 0.01
-y1 = 0.1
+x2 = 0.025
+y1 = -0.0025
+
+#parameters_tips
+average_tip = 2.5
+variance_tip = 1
+additional_tips_average_age = 2
+max_age = 85
 
 MDRangeMatrix = matrix(c(10,4,6,0,2,11,4,6,0,2,12,4,6,0,2,13,4,6,0,2,14,4,5,0,1,15,0,2,6,8,16,0,2,6,8,17,0,2,6,8,18,4,6,1,2,19,4,6,1,2,20,4,6,1,2,21,0,2,7,10,22,0,2,7,10,23,0,2,7,10), nrow = 14, ncol = 5, byrow = TRUE )
 
@@ -214,7 +243,6 @@ allcustomers = createAllCustomers(cpct, mu1, mu2, sig1, sig2)
 times = getTimes()
 timeandcustomers = data.frame(times, allcustomers)
 #timeslots = as.numeric(substr(timeandcustomers$times,12,13))
-
-plot(get_restaurant_temperature(timeandcustomers[,2],timeandcustomers[,2]))
-
+doors_opened = createOpendoors(timeandcustomers[,2])
+temperature = get_restaurant_temperature(timeandcustomers[,2],doors_opened)
 mealsanddrinks = createMealsDrinks(timeandcustomers[,2])

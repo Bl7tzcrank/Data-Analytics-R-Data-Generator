@@ -129,10 +129,16 @@ createseason = function(dates){
 }
 
 #creates number of times the door was opened
-createopendoors = function(customers, daytimes){
+createOpendoors = function(customers){
   
-  ##mapply(function(x,y){x-y}, x1,y1)
+  opendoors <- sapply(customers,function(x){
+    
+    (abs(round(rnorm(1,mean=x, sd = 2)))+1)*2
+    
+    })
+  return (opendoors)
 }
+
 
 #####################################################end of functions###########################################
 

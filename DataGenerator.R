@@ -132,6 +132,17 @@ createSeason = function(dates){
   return (unlist(soy))
 }
 
+#create the temperature outside based on season 1-4, 14 hours a day
+createWeather = function(times,season){
+  Weather <- mapply(function (x,y){
+    if () {
+      
+    }
+  },times,season)
+                  
+return(Weather)                    
+}
+
 #creates number of times the door was opened
 createOpendoors = function(customers){
   
@@ -254,6 +265,7 @@ get_restaurant_temperature = function(number_of_customers,doors_opened){
 #Reasoning:The tips of course heavily depend on the number of customers. In addition the older the customers, the higher the average tip.
 #NOT TESTED YET:WAITING FOR AGE IMPLEMENTATION
 get_tips = function(number_of_customers,average_age){
+  averageAge[which(is.na(averageAge))] = 0
   tips = round((rnorm(length(number_of_customers),average_tip,variance_tip)+additional_tips_average_age*(average_age/max_age)),2)*number_of_customers 
 }
   
@@ -290,9 +302,9 @@ y1 = -0.0025
 
 #parameters_tips
 average_tip = 2.5
-variance_tip = 1
-additional_tips_average_age = 2
-max_age = 85
+variance_tip = 0.5
+additional_tips_average_age = 3
+max_age = 60
 
 #parameters_revenue
 average_price_meal = 15.0
@@ -314,6 +326,7 @@ timeandcustomers = data.frame(times, allcustomers)
 #timeslots = as.numeric(substr(timeandcustomers$times,12,13))
 averageAge = createAverageAge(allcustomers)
 paymentmethods = createPaymentMethods(allcustomers, averageAge)
+tips=get_tips(timeandcustomers[,2],averageAge)
 doors_opened = createOpendoors(timeandcustomers[,2])
 temperature = get_restaurant_temperature(timeandcustomers[,2],doors_opened)
 mealsanddrinks = createMealsDrinks(timeandcustomers[,2])

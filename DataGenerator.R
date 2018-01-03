@@ -138,6 +138,27 @@ createOpendoors = function(customers){
   return (opendoors)
 }
 
+#computes the amount of gas used per hour (kwh); depends on numberofmeals*numberofcustomers; input mealsanddrinks[,1]
+createGas = function(numberofmeals,customers){
+  
+  gas <- mapply(function(x,y){
+    
+    (abs(round(rnorm(1,mean=x*y*500,sd=1000)))+1)^(1/2)
+  }, numberofmeals,customers)
+  
+  return(gas)
+}
+
+createWater = function(numberofmeals,customers){
+  
+  water <- mapply(function(x,y){
+    
+    (abs(round(rnorm(1,mean=x*y*10,sd=10)))+1)^(2/3)
+  }, numberofmeals,customers)
+  
+  return(water)
+  
+}
 
 <<<<<<< HEAD
 #calculates restaurant temperature

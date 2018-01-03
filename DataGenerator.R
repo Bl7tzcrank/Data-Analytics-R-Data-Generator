@@ -138,8 +138,6 @@ createOpendoors = function(customers){
   return (opendoors)
 }
 
-
-<<<<<<< HEAD
 #calculates restaurant temperature
 #OPEN:adjustment of 
 get_restaurant_temperature = function(number_of_customers,doors_opened){
@@ -147,8 +145,6 @@ get_restaurant_temperature = function(number_of_customers,doors_opened){
   return(temperature)
 }
 
-=======
->>>>>>> 3908ee03204623e0ff66d1879fd9f79ecf222ba9
 #####################################################end of functions###########################################
 
 #####################################################begin of data instances###########################################

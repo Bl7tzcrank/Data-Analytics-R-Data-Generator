@@ -138,6 +138,7 @@ createOpendoors = function(customers){
   return (opendoors)
 }
 
+<<<<<<< HEAD
 #computes the amount of gas used per hour (kwh); depends on numberofmeals*numberofcustomers; input mealsanddrinks[,1]
 createGas = function(numberofmeals,customers){
   
@@ -161,6 +162,8 @@ createWater = function(numberofmeals,customers){
 }
 
 <<<<<<< HEAD
+=======
+>>>>>>> 6f961111779f426efa20497e03c435d435d957bd
 #calculates restaurant temperature
 #OPEN:adjustment of 
 get_restaurant_temperature = function(number_of_customers,doors_opened){
@@ -168,8 +171,6 @@ get_restaurant_temperature = function(number_of_customers,doors_opened){
   return(temperature)
 }
 
-=======
->>>>>>> 3908ee03204623e0ff66d1879fd9f79ecf222ba9
 #####################################################end of functions###########################################
 
 #####################################################begin of data instances###########################################

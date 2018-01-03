@@ -135,11 +135,11 @@ createSeason = function(dates){
 #create the temperature outside based on seasons 1-4, 14 hours a day
 createWeather = function(times,season){
   doy <- unique(as.numeric(strftime(times,format = "%j")))
-  YearWeather <- sapply(list, function)
-
-  },times,season)
+  YearWeather <- sapply(doy, function(x){
+    
+  }
                   
-return(Weather)                    
+#return(Weather)                    
 }
 
 

@@ -189,14 +189,13 @@ createOpendoors = function(customers){
   return (opendoors)
 }
 
-#computes the amount of gas used per hour (kwh); depends on numberofmeals*numberofcustomers; input mealsanddrinks[,1]
-createGas = function(numberofmeals,customers){
+#computes the amount of gas used per hour (kwh); depends on number of meals; input mealsanddrinks[,1]
+createGas = function(numberofmeals){
   
-  gas <- mapply(function(x,y){
+  gas <- sapply(numberofmeals,function(x){
     
-    (abs(round(rnorm(1,mean=x*y*500,sd=1000))))^(1/2)
-  }, numberofmeals,customers)
-  
+    (abs(round(rnorm(1,mean=x*500,sd=1000))))^(1/2)
+  })
   return(gas)
 }
 
@@ -254,21 +253,21 @@ createPaymentMethods = function(customers, customerages){
   return(data.frame("card" = card, "cash" = cash))
 }
 
-#computes the ampunt of water used per hour (liters); depends on numberofmeals*numberofcustomers; input mealsanddrinks[,1]
-createWater = function(numberofmeals,customers){
-  water <- mapply(function(x,y){
-    (abs(round(rnorm(1,mean=x*y*10,sd=10))))^(2/3)
-  }, numberofmeals,customers)
+#computes the ampunt of water used per hour (liters); depends on number of meals; input mealsanddrinks[,1]
+createWater = function(numberofmeals){
+  water <- sapply(numberofmeals,function(x){
+    (abs(round(rnorm(1,mean=x*10,sd=10))))^(2/3)
+  })
   return(water)
 }
 
-#computes the ampunt of electricity used per hour (kwh); depends on numberofmeals*numberofcustomers and weather outside; input mealsanddrinks[,1]
-createElectricity = function(numberofmeals,customers,weather){
+#computes the ampunt of electricity used per hour (kwh); depends on number of meals and weather outside; input mealsanddrinks[,1]
+createElectricity = function(numberofmeals,weather){
   
-  electricitycooking <- mapply(function(x,y){
+  electricitycooking <- sapply(numberofmeals,function(x){
     
-    (abs(round(rnorm(1,mean=x*y*100000,sd=500000))))^(1/3)
-  }, numberofmeals,customers)
+    (abs(round(rnorm(1,mean=x*100000,sd=500000))))^(1/3)
+  })
   # 1 kwh per degree lower then 20
   electricityheating <- sapply(weather, function(x){
     if(x < 20){
@@ -373,15 +372,27 @@ MDRangeMatrix = matrix(c(10,4,6,0,2,11,4,6,0,2,12,4,6,0,2,13,4,6,0,2,14,4,5,0,1,
 
 #####################################################begin of main part###########################################
 
-allcustomers = createAllCustomers(cpct, mu1, mu2, sig1, sig2)
 times = getTimes()
+allcustomers = createAllCustomers(cpct, mu1, mu2, sig1, sig2)
+season = createSeason(times)
 timeandcustomers = data.frame(times, allcustomers)
 #timeslots = as.numeric(substr(timeandcustomers$times,12,13))
 averageAge = createAverageAge(allcustomers)
 tips=get_tips(timeandcustomers[,2],averageAge)
 doors_opened = createOpendoors(timeandcustomers[,2])
-temperature = get_restaurant_temperature(timeandcustomers[,2],doors_opened)
 outsidetemperature = createWeather()
+restaurant_temperature = get_restaurant_temperature(timeandcustomers[,2],doors_opened)
 mealsanddrinks = createMealsDrinks(timeandcustomers[,2])
-PaymentMethods = createPaymentMethods(timeandcustomers[,2],averageAge)
-revenues = get_revenues(mealsanddrinks[,1], mealsanddrinks[,2], PaymentMethods[,1], PaymentMethods[,2])
+gas_consumption = createGas(mealsanddrinks[,1])
+water_consumption = createWater(mealsanddrinks[,1])
+#electricity_consumption = createElectricity(mealsanddrinks[,1],weather)
+paymentMethods = createPaymentMethods(timeandcustomers[,2],averageAge)
+revenues = get_revenues(mealsanddrinks[,1], mealsanddrinks[,2], paymentMethods[,1], paymentMethods[,2])
+
+dataset = data.frame("time" = times, "#customers" = allcustomers, "season" = season, "average_Age" = averageAge, 
+                     "tips" = tips, "#doors_opened" = doors_opened, "restaurant_temperature" = restaurant_temperature, 
+                     mealsanddrinks, "gas_consumption" = gas_consumption, "water_comsumption" = water_consumption,
+                     paymentMethods, revenues)
+
+
+

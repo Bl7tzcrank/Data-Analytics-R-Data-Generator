@@ -29,6 +29,18 @@ bimodalDistFunc <- function (n,cpct, mu1, mu2, sig1, sig2) {
   y <- y0*(1 - flag) + y1*flag 
 }
 
+decimalnumcount<-function(y){
+  if(y%%1 != 0){
+    x = toString(y)
+    stopifnot(class(x)=="character")
+    x<-gsub("(.*)(\\.)|([0]*$)","",x)
+    nchar(x)
+  }
+  else{
+    return(0)
+  }
+}
+
 #cut off the values which are not in the range of 10 and 23
 filterbimodaldata = function(x){ 
   temp = x
@@ -162,6 +174,8 @@ createGas = function(numberofmeals){
     
     (abs(round(rnorm(1,mean=x*500,sd=1000))))^(1/2)
   })
+  
+  gas <- round(gas,2)
   return(gas)
 }
 
@@ -224,6 +238,7 @@ createWater = function(numberofmeals){
   water <- sapply(numberofmeals,function(x){
     (abs(round(rnorm(1,mean=x*10,sd=10))))^(2/3)
   })
+  water <- round(water,2)
   return(water)
 }
 
@@ -240,6 +255,8 @@ createElectricity = function(numberofmeals,weather){
       (20-x)*1
     }
   })
+  electricitycooking <- round(electricitycooking,2)
+  electricityheating <- round(electricityheating,2)
   
   return (electricitycooking+electricityheating)
 }
@@ -300,6 +317,61 @@ get_revenues = function(number_of_meals, number_of_drinks, card_payments,cash_pa
   return(result)
 }
 
+#1%-chance is stays in data range, 1%-chance that is doesnt stay in data range
+createoutliers <- function(dataset){
+  
+  for(k in 3:ncol(dataset)){
+    
+    minX <- min(dataset[k],na.rm=TRUE)
+    maxX <- max(dataset[k],na.rm=TRUE)
+    
+    for (i in 1:length(dataset[,k])){
+      
+      if(!is.na(dataset[i,k])){
+        random <- round(runif(1,1,1000))
+        if(random == 999){
+          #for outliers within the data range
+          
+          #print(paste0("Min: ", minX))
+          #print(paste0("Max: ", maxX))
+          
+          randomoutlier = runif(1,minX,maxX)
+          
+          adaptedoutlier = trunc(randomoutlier*10^decimalnumcount(maxX))/10^decimalnumcount(maxX)
+          #print(paste0("Original: ", dataset[i,k]))
+          dataset[i,k] = adaptedoutlier
+          
+          #print(paste0("Outlier1: ", adaptedoutlier))
+          #print(paste0("Outlier2: ", dataset[i,k]))
+          
+        }else if(random == 1000){
+          #for outliers without the data range
+          random <- round(runif(1,1,2))
+          
+          #print(paste0("ExtremeOriginal: ", dataset[i,k]))
+          if(random == 1){
+            #smaller
+            randomoutlier = rnorm(1,minX+maxX,minX+maxX)
+            adaptedoutlier = trunc(randomoutlier*10^decimalnumcount(minX))/10^decimalnumcount(minX)
+            dataset[i,k] = minX - adaptedoutlier
+          }else{
+            #bigger
+            randomoutlier = rnorm(1,minX+maxX,minX+maxX)
+            adaptedoutlier = trunc(randomoutlier*10^decimalnumcount(maxX))/10^decimalnumcount(maxX)
+            dataset[i,k] = maxX + adaptedoutlier
+          }
+          #print(paste0("Min: ", minX))
+          #print(paste0("Max: ", maxX))
+          #print(paste0("Random: ", randomoutlier))
+          #print(paste0("ExtremeDifference: ", adaptedoutlier))
+          #print(paste0("ExtremeOutlier: ", dataset[i,k]))
+        }
+      }
+     
+    }
+  }
+}
+
 #####################################################end of functions###########################################
 
 #####################################################begin of data instances###########################################
@@ -354,10 +426,10 @@ water_consumption = createWater(mealsanddrinks[,1])
 paymentMethods = createPaymentMethods(timeandcustomers[,2],averageAge)
 revenues = get_revenues(mealsanddrinks[,1], mealsanddrinks[,2], paymentMethods[,1], paymentMethods[,2])
 
-dataset = data.frame("time" = times, "#customers" = allcustomers, "season" = season, "average_Age" = averageAge, 
+dataset = data.frame("time" = times, "season" = season, "#customers" = allcustomers, "average_Age" = averageAge, 
                      "tips" = tips, "#doors_opened" = doors_opened, "restaurant_temperature" = restaurant_temperature, 
                      mealsanddrinks, "gas_consumption" = gas_consumption, "water_comsumption" = water_consumption,
                      paymentMethods, revenues)
 
-
+dataset <- createoutliers(dataset)
 

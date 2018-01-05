@@ -56,7 +56,7 @@ filterbimodaldata = function(x){
 createCustomerPerDay = function(n,cpct, mu1, mu2, sig1, sig2){
   data = bimodalDistFunc(n,cpct, mu1, mu2, sig1, sig2)
   floordata = floor(data) #round down
-  sorteddata = sortbimodaldata(floordata) #cut off data in range 10 to 23
+  sorteddata = filterbimodaldata(floordata) #cut off data in range 10 to 23
   return(sorteddata)
 }
 
@@ -133,6 +133,7 @@ createMealsDrinks = function(customers){ #parameters are not necessary (?)
 }
 
 #creates the season (1-4) for every timestamp and returns it as a vector
+#1: spring; 2: summer; 3: autumn; 4: winter
 createSeason = function(dates){
   moy <- month(dates)
   soy <- sapply(moy, function(x){
@@ -145,16 +146,49 @@ createSeason = function(dates){
 }
 
 #create the temperature outside based on seasons 1-4, 14 hours a day
-createWeather = function(times,season){
-  doy <- unique(as.numeric(strftime(times,format = "%j")))
-  YearWeather <- sapply(doy, function(x){
-    
-  }
-                  
-#return(Weather)                    
+createWeather = function(){
+  #calculates the average temperature of every month
+  #we are assuming that the average temperature scaled from mai to april is distributed
+  #like a sin(x)-function with mean of 11.5 and a factor of 12.5 to simulate
+  #temperatures between -1 and 24 °C
+  monthlyavgtemperature = sapply(1:12, function(x){
+    if(x < 5){
+      11.5 - 12.5*sin(pi*((x+8)/6)-pi)
+    } else{
+      11.5 - 12.5*sin(pi*((x-4)/6)-pi)
+    }
+  })
+  
+  #calculates the average temperature of each day.
+  #The temperature of a day is within an interval of the average 
+  #temperature of the corresponding month +/- 3. (unif. distribution)
+  dailyavgtemperature = unlist(sapply(1:12, function(x){
+    if(x == 4 || x == 6 || x == 9 || x == 11){
+      sapply(1:30, function(y){
+        runif(n = 1, min = monthlyavgtemperature[x] - 3, max = monthlyavgtemperature[x] + 3)
+      })
+    } else if(x == 2){
+      sapply(1:29, function(y){
+        runif(n = 1, min = monthlyavgtemperature[x] - 3, max = monthlyavgtemperature[x] + 3)
+      })
+    } else{
+      sapply(1:31, function(y){
+        runif(n = 1, min = monthlyavgtemperature[x] - 3, max = monthlyavgtemperature[x] + 3)
+      })
+    }
+  }))
+  
+  #calculates the avg. temperature on each hour of all days.
+  #again modeled as a sin(x)-function with the avg dailytemp. as a mean
+  #and +- 4 as the deviation.
+  hourlyavgtemperature = unlist(as.list(sapply(1:366, function(x){
+    sapply(1:24, function(y){
+      dailyavgtemperature[x] - 3*sin(pi*((y)/12)-pi) #WIP
+    })[1:14]
+  })))
+  
+  return(hourlyavgtemperature)                    
 }
-
-
 
 #creates number of times the door was opened
 createOpendoors = function(customers){
@@ -418,6 +452,7 @@ timeandcustomers = data.frame(times, allcustomers)
 averageAge = createAverageAge(allcustomers)
 tips=get_tips(timeandcustomers[,2],averageAge)
 doors_opened = createOpendoors(timeandcustomers[,2])
+outsidetemperature = createWeather()
 restaurant_temperature = get_restaurant_temperature(timeandcustomers[,2],doors_opened)
 mealsanddrinks = createMealsDrinks(timeandcustomers[,2])
 gas_consumption = createGas(mealsanddrinks[,1])

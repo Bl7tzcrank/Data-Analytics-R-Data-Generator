@@ -150,7 +150,7 @@ createWeather = function(){
   #calculates the average temperature of every month
   #we are assuming that the average temperature scaled from mai to april is distributed
   #like a sin(x)-function with mean of 11.5 and a factor of 12.5 to simulate
-  #temperatures between -1 and 24 °C
+  #temperatures between -1 and 24 ?C
   monthlyavgtemperature = sapply(1:12, function(x){
     if(x < 5){
       11.5 - 12.5*sin(pi*((x+8)/6)-pi)
@@ -278,7 +278,7 @@ createWater = function(numberofmeals){
 
 #computes the ampunt of electricity used per hour (kwh); depends on number of meals and weather outside; input mealsanddrinks[,1]
 createElectricity = function(numberofmeals,weather){
-  
+
   electricitycooking <- sapply(numberofmeals,function(x){
     
     (abs(round(rnorm(1,mean=x*100000,sd=500000))))^(1/3)
@@ -287,12 +287,12 @@ createElectricity = function(numberofmeals,weather){
   electricityheating <- sapply(weather, function(x){
     if(x < 20){
       (20-x)*1
-    }
+    }else{0}
   })
-  electricitycooking <- round(electricitycooking,2)
-  electricityheating <- round(electricityheating,2)
   
-  return (electricitycooking+electricityheating)
+  electricity <- round(electricitycooking+electricityheating,2)
+  
+  return (electricity)
 }
 
 #calculates restaurant temperature
@@ -378,32 +378,34 @@ createoutliers <- function(dataset){
           #print(paste0("Outlier1: ", adaptedoutlier))
           #print(paste0("Outlier2: ", dataset[i,k]))
           
-        }else if(random == 1000){
+        }#else if(random == 1000){
           #for outliers without the data range
-          random <- round(runif(1,1,2))
+          #random <- round(runif(1,1,2))
           
           #print(paste0("ExtremeOriginal: ", dataset[i,k]))
-          if(random == 1){
+          #if(random == 1){
             #smaller
-            randomoutlier = rnorm(1,minX+maxX,minX+maxX)
-            adaptedoutlier = trunc(randomoutlier*10^decimalnumcount(minX))/10^decimalnumcount(minX)
-            dataset[i,k] = minX - adaptedoutlier
-          }else{
+            #randomoutlier = rnorm(1,minX+maxX,minX+maxX)
+            #adaptedoutlier = trunc(randomoutlier*10^decimalnumcount(minX))/10^decimalnumcount(minX)
+            #dataset[i,k] = minX - adaptedoutlier
+          #}else{
             #bigger
-            randomoutlier = rnorm(1,minX+maxX,minX+maxX)
-            adaptedoutlier = trunc(randomoutlier*10^decimalnumcount(maxX))/10^decimalnumcount(maxX)
-            dataset[i,k] = maxX + adaptedoutlier
+            #randomoutlier = rnorm(1,minX+maxX,minX+maxX)
+            #adaptedoutlier = trunc(randomoutlier*10^decimalnumcount(maxX))/10^decimalnumcount(maxX)
+            #dataset[i,k] = maxX + adaptedoutlier
           }
           #print(paste0("Min: ", minX))
           #print(paste0("Max: ", maxX))
           #print(paste0("Random: ", randomoutlier))
           #print(paste0("ExtremeDifference: ", adaptedoutlier))
           #print(paste0("ExtremeOutlier: ", dataset[i,k]))
-        }
-      }
+        #}
+      #}
      
     }
   }
+  
+  return(dataset)
 }
 
 #####################################################end of functions###########################################
@@ -457,14 +459,14 @@ restaurant_temperature = get_restaurant_temperature(timeandcustomers[,2],doors_o
 mealsanddrinks = createMealsDrinks(timeandcustomers[,2])
 gas_consumption = createGas(mealsanddrinks[,1])
 water_consumption = createWater(mealsanddrinks[,1])
-#electricity_consumption = createElectricity(mealsanddrinks[,1],weather)
+electricity_consumption = createElectricity(mealsanddrinks[,1],outsidetemperature)
 paymentMethods = createPaymentMethods(timeandcustomers[,2],averageAge)
 revenues = get_revenues(mealsanddrinks[,1], mealsanddrinks[,2], paymentMethods[,1], paymentMethods[,2])
 
-dataset = data.frame("time" = times, "season" = season, "#customers" = allcustomers, "average_Age" = averageAge, 
-                     "tips" = tips, "#doors_opened" = doors_opened, "restaurant_temperature" = restaurant_temperature, 
-                     mealsanddrinks, "gas_consumption" = gas_consumption, "water_comsumption" = water_consumption,
-                     paymentMethods, revenues)
+dataset1 = data.frame("time" = times, "season" = season, "customers" = allcustomers, "average_Age" = averageAge, 
+                     "tips" = tips, "doors_opened" = doors_opened, "weather" = outsidetemperature, "restaurant_temperature" = restaurant_temperature, 
+                     mealsanddrinks, "gas_consumption" = gas_consumption, "water_comsumption" = water_consumption, 
+                     "electricity_consumption" = electricity_consumption, paymentMethods, revenues)
 
-dataset <- createoutliers(dataset)
+dataset2 <- createoutliers(dataset1)
 

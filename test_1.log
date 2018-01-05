@@ -21,33 +21,33 @@
 
  initial eigenvalues for each cluster >> 
  (rows correspond to clusters)
-0.584 0.585
-0.56 0.687
+0.984 0.706
+0.887 0.647
 
  Mean vectors and covariance matrices before rotation --- 1th cluster >>
 
  mean vector (mu'=Q*mu)>>
--2.341 0
+-2.597 0
 
  covariance matrix (Sigma'=Q*Sigma*t(Q))>>
 
-0.584 0
-0 0.585
+0.931 0.11
+0.11 0.76
 
  Mean vectors and covariance matrices before rotation --- 2th cluster >>
 
  mean vector (mu'=Q*mu)>>
-2.341 0
+2.597 0
 
  covariance matrix (Sigma'=Q*Sigma*t(Q))>>
 
-0.686 -0.008
--0.008 0.561
+0.656 0.045
+0.045 0.878
 
  Final eigenvalues for each cluster >> 
  (rows correspond to clusters)
-0.585 0.584
-0.687 0.56
+0.984 0.706
+0.887 0.647
 
  *************************************************
 
@@ -57,33 +57,33 @@
 
 
  The orthogonal matrix Q >>
-0.364 0.932
-0.932 -0.364
+0.835 0.55
+0.55 -0.835
 
  Mean vectors and covariance matrices after rotation --- 1th cluster >>
 
  mean vector (mu'=Q*mu)>>
--0.851 -2.181
+-2.169 -1.429
 
  covariance matrix (Sigma'=Q*Sigma*t(Q))>>
 
-0.585 0
-0 0.585
+0.98 0.035
+0.035 0.711
 
  Mean vectors and covariance matrices after rotation --- 2th cluster >>
 
  mean vector (mu'=Q*mu)>>
-0.851 2.181
+2.169 1.429
 
  covariance matrix (Sigma'=Q*Sigma*t(Q))>>
 
-0.572 0.037
-0.037 0.675
+0.765 -0.12
+-0.12 0.769
 
  Final eigenvalues for each cluster >> 
  (rows correspond to clusters)
-0.585 0.584
-0.687 0.56
+0.984 0.706
+0.887 0.647
 
  theoretical Separation index matrix >>
 
@@ -93,14 +93,14 @@
  theoretical projection directions >>
 
 **** cluster 1 and 2
-0.37 0.929
+0.782 0.624
 
  empirical Separation index matrix (alpha= 0.05 )>>
 
--1 0.199
-0.199 -1
+-1 0.196
+0.196 -1
 
  empirical projection directions >>
 
 **** cluster 1 and 2
-0.348 0.937
+0.774 0.633

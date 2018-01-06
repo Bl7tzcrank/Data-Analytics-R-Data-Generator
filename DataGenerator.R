@@ -29,6 +29,18 @@ bimodalDistFunc <- function (n,cpct, mu1, mu2, sig1, sig2) {
   y <- y0*(1 - flag) + y1*flag 
 }
 
+decimalnumcount<-function(y){
+  if(y%%1 != 0){
+    x = toString(y)
+    stopifnot(class(x)=="character")
+    x<-gsub("(.*)(\\.)|([0]*$)","",x)
+    nchar(x)
+  }
+  else{
+    return(0)
+  }
+}
+
 #cut off the values which are not in the range of 10 and 23
 filterbimodaldata = function(x){ 
   temp = x
@@ -44,7 +56,7 @@ filterbimodaldata = function(x){
 createCustomerPerDay = function(n,cpct, mu1, mu2, sig1, sig2){
   data = bimodalDistFunc(n,cpct, mu1, mu2, sig1, sig2)
   floordata = floor(data) #round down
-  sorteddata = sortbimodaldata(floordata) #cut off data in range 10 to 23
+  sorteddata = filterbimodaldata(floordata) #cut off data in range 10 to 23
   return(sorteddata)
 }
 
@@ -53,15 +65,15 @@ createCustomerTimeFrequency = function(n,cpct, mu1, mu2, sig1, sig2){
   allcustomers = as.data.frame(table(createCustomerPerDay(n,cpct, mu1, mu2, sig1, sig2)))
   freq = c()
   for (i in 10:23){
-      if(length(which(allcustomers[,1] == i)) > 0){
-        if (allcustomers[which(allcustomers[,1] == i),2] >60){
-          freq = append(freq, 60)
-        }else{
-          freq = append(freq, allcustomers[which(allcustomers[,1] == i),2])
-        }
-      } else{
-        freq = append(freq, 0)
+    if(length(which(allcustomers[,1] == i)) > 0){
+      if (allcustomers[which(allcustomers[,1] == i),2] >60){
+        freq = append(freq, 60)
+      }else{
+        freq = append(freq, allcustomers[which(allcustomers[,1] == i),2])
       }
+    } else{
+      freq = append(freq, 0)
+    }
   }
   return(freq)
 }
@@ -121,6 +133,7 @@ createMealsDrinks = function(customers){ #parameters are not necessary (?)
 }
 
 #creates the season (1-4) for every timestamp and returns it as a vector
+#1: spring; 2: summer; 3: autumn; 4: winter
 createSeason = function(dates){
   moy <- month(dates)
   soy <- sapply(moy, function(x){
@@ -128,21 +141,54 @@ createSeason = function(dates){
     else if (5 < x && x < 9){2}
     else if (8 < x && x < 12){3}
     else if(11 < x || x < 3){4}
-    })
+  })
   return (unlist(soy))
 }
 
 #create the temperature outside based on seasons 1-4, 14 hours a day
-createWeather = function(times,season){
-  doy <- unique(as.numeric(strftime(times,format = "%j")))
-  YearWeather <- sapply(doy, function(x){
-    
-  }
-                  
-#return(Weather)                    
+createWeather = function(){
+  #calculates the average temperature of every month
+  #we are assuming that the average temperature scaled from mai to april is distributed
+  #like a sin(x)-function with mean of 11.5 and a factor of 12.5 to simulate
+  #temperatures between -1 and 24 ?C
+  monthlyavgtemperature = sapply(1:12, function(x){
+    if(x < 5){
+      11.5 - 12.5*sin(pi*((x+8)/6)-pi)
+    } else{
+      11.5 - 12.5*sin(pi*((x-4)/6)-pi)
+    }
+  })
+  
+  #calculates the average temperature of each day.
+  #The temperature of a day is within an interval of the average 
+  #temperature of the corresponding month +/- 3. (unif. distribution)
+  dailyavgtemperature = unlist(sapply(1:12, function(x){
+    if(x == 4 || x == 6 || x == 9 || x == 11){
+      sapply(1:30, function(y){
+        runif(n = 1, min = monthlyavgtemperature[x] - 3, max = monthlyavgtemperature[x] + 3)
+      })
+    } else if(x == 2){
+      sapply(1:29, function(y){
+        runif(n = 1, min = monthlyavgtemperature[x] - 3, max = monthlyavgtemperature[x] + 3)
+      })
+    } else{
+      sapply(1:31, function(y){
+        runif(n = 1, min = monthlyavgtemperature[x] - 3, max = monthlyavgtemperature[x] + 3)
+      })
+    }
+  }))
+  
+  #calculates the avg. temperature on each hour of all days.
+  #again modeled as a sin(x)-function with the avg dailytemp. as a mean
+  #and +- 4 as the deviation.
+  hourlyavgtemperature = unlist(as.list(sapply(1:366, function(x){
+    sapply(1:24, function(y){
+      dailyavgtemperature[x] - 3*sin(pi*((y)/12)-pi) #WIP
+    })[1:14]
+  })))
+  
+  return(hourlyavgtemperature)                    
 }
-
-
 
 #creates number of times the door was opened
 createOpendoors = function(customers){
@@ -151,18 +197,19 @@ createOpendoors = function(customers){
     
     (abs(round(rnorm(1,mean=x, sd = 2)))+1)*2
     
-    })
+  })
   return (opendoors)
 }
 
-#computes the amount of gas used per hour (kwh); depends on numberofmeals*numberofcustomers; input mealsanddrinks[,1]
-createGas = function(numberofmeals,customers){
+#computes the amount of gas used per hour (kwh); depends on number of meals; input mealsanddrinks[,1]
+createGas = function(numberofmeals){
   
-  gas <- mapply(function(x,y){
+  gas <- sapply(numberofmeals,function(x){
     
-    (abs(round(rnorm(1,mean=x*y*500,sd=1000))))^(1/2)
-  }, numberofmeals,customers)
+    (abs(round(rnorm(1,mean=x*500,sd=1000))))^(1/2)
+  })
   
+  gas <- round(gas,2)
   return(gas)
 }
 
@@ -220,29 +267,32 @@ createPaymentMethods = function(customers, customerages){
   return(data.frame("card" = card, "cash" = cash))
 }
 
-#computes the ampunt of water used per hour (liters); depends on numberofmeals*numberofcustomers; input mealsanddrinks[,1]
-createWater = function(numberofmeals,customers){
-  water <- mapply(function(x,y){
-    (abs(round(rnorm(1,mean=x*y*10,sd=10))))^(2/3)
-  }, numberofmeals,customers)
+#computes the ampunt of water used per hour (liters); depends on number of meals; input mealsanddrinks[,1]
+createWater = function(numberofmeals){
+  water <- sapply(numberofmeals,function(x){
+    (abs(round(rnorm(1,mean=x*10,sd=10))))^(2/3)
+  })
+  water <- round(water,2)
   return(water)
 }
 
-#computes the ampunt of electricity used per hour (kwh); depends on numberofmeals*numberofcustomers and weather outside; input mealsanddrinks[,1]
-createElectricity = function(numberofmeals,customers,weather){
+#computes the ampunt of electricity used per hour (kwh); depends on number of meals and weather outside; input mealsanddrinks[,1]
+createElectricity = function(numberofmeals,weather){
   
-  electricitycooking <- mapply(function(x,y){
+  electricitycooking <- sapply(numberofmeals,function(x){
     
-    (abs(round(rnorm(1,mean=x*y*100000,sd=500000))))^(1/3)
-  }, numberofmeals,customers)
+    (abs(round(rnorm(1,mean=x*100000,sd=500000))))^(1/3)
+  })
   # 1 kwh per degree lower then 20
   electricityheating <- sapply(weather, function(x){
     if(x < 20){
       (20-x)*1
-    }
+    }else{0}
   })
   
-  return (electricitycooking+electricityheating)
+  electricity <- round(electricitycooking+electricityheating,2)
+  
+  return (electricity)
 }
 
 #calculates restaurant temperature
@@ -264,7 +314,7 @@ get_tips = function(number_of_customers,average_age){
   averageAge[which(is.na(averageAge))] = 0
   tips = round((rnorm(length(number_of_customers),average_tip,variance_tip)+additional_tips_average_age*(average_age/max_age)),2)*number_of_customers 
 }
-  
+
 #calculates revenue
 #Reasoning: Revenues depend on consumed meals and drinks. Furthermore customers paying with cards tend to order more expensive meals than customers
 #paying cash.
@@ -279,7 +329,7 @@ get_revenues = function(number_of_meals, number_of_drinks, card_payments,cash_pa
   })
   
   temp = data.frame(cash_payments,card_payments,revenue_meals,revenue_drinks,paymentbinaer)
-
+  
   revMeals = apply(temp[,3:5],1,function(X){
     if(X[3]==1){  
       X[1] = X[1] * runif(1,min_revenue_percentage_boost,max_revenue_percentage_boost)
@@ -299,6 +349,63 @@ get_revenues = function(number_of_meals, number_of_drinks, card_payments,cash_pa
   result = data.frame(round(revMeals+revDrinks,2),round(revMeals,2),round(revDrinks,2))
   colnames(result) <- c("total_revenue","meal_revenue","drink_revenue")
   return(result)
+}
+
+#1%-chance is stays in data range, 1%-chance that is doesnt stay in data range
+createoutliers <- function(dataset){
+  
+  for(k in 3:ncol(dataset)){
+    
+    minX <- min(dataset[k],na.rm=TRUE)
+    maxX <- max(dataset[k],na.rm=TRUE)
+    
+    for (i in 1:length(dataset[,k])){
+      
+      if(!is.na(dataset[i,k])){
+        random <- round(runif(1,1,1000))
+        if(random == 999){
+          #for outliers within the data range
+          
+          #print(paste0("Min: ", minX))
+          #print(paste0("Max: ", maxX))
+          
+          randomoutlier = runif(1,minX,maxX)
+          
+          adaptedoutlier = trunc(randomoutlier*10^decimalnumcount(maxX))/10^decimalnumcount(maxX)
+          #print(paste0("Original: ", dataset[i,k]))
+          dataset[i,k] = adaptedoutlier
+          
+          #print(paste0("Outlier1: ", adaptedoutlier))
+          #print(paste0("Outlier2: ", dataset[i,k]))
+          
+        }#else if(random == 1000){
+        #for outliers without the data range
+        #random <- round(runif(1,1,2))
+        
+        #print(paste0("ExtremeOriginal: ", dataset[i,k]))
+        #if(random == 1){
+        #smaller
+        #randomoutlier = rnorm(1,minX+maxX,minX+maxX)
+        #adaptedoutlier = trunc(randomoutlier*10^decimalnumcount(minX))/10^decimalnumcount(minX)
+        #dataset[i,k] = minX - adaptedoutlier
+        #}else{
+        #bigger
+        #randomoutlier = rnorm(1,minX+maxX,minX+maxX)
+        #adaptedoutlier = trunc(randomoutlier*10^decimalnumcount(maxX))/10^decimalnumcount(maxX)
+        #dataset[i,k] = maxX + adaptedoutlier
+      }
+      #print(paste0("Min: ", minX))
+      #print(paste0("Max: ", maxX))
+      #print(paste0("Random: ", randomoutlier))
+      #print(paste0("ExtremeDifference: ", adaptedoutlier))
+      #print(paste0("ExtremeOutlier: ", dataset[i,k]))
+      #}
+      #}
+      
+    }
+  }
+  
+  return(dataset)
 }
 
 #####################################################end of functions###########################################
@@ -339,14 +446,26 @@ MDRangeMatrix = matrix(c(10,4,6,0,2,11,4,6,0,2,12,4,6,0,2,13,4,6,0,2,14,4,5,0,1,
 
 #####################################################begin of main part###########################################
 
-allcustomers = createAllCustomers(cpct, mu1, mu2, sig1, sig2)
 times = getTimes()
+allcustomers = createAllCustomers(cpct, mu1, mu2, sig1, sig2)
+season = createSeason(times)
 timeandcustomers = data.frame(times, allcustomers)
 #timeslots = as.numeric(substr(timeandcustomers$times,12,13))
 averageAge = createAverageAge(allcustomers)
 tips=get_tips(timeandcustomers[,2],averageAge)
 doors_opened = createOpendoors(timeandcustomers[,2])
-temperature = get_restaurant_temperature(timeandcustomers[,2],doors_opened)
+outsidetemperature = createWeather()
+restaurant_temperature = get_restaurant_temperature(timeandcustomers[,2],doors_opened)
 mealsanddrinks = createMealsDrinks(timeandcustomers[,2])
-PaymentMethods = createPaymentMethods(timeandcustomers[,2],averageAge)
-revenues = get_revenues(mealsanddrinks[,1], mealsanddrinks[,2], PaymentMethods[,1], PaymentMethods[,2])
+gas_consumption = createGas(mealsanddrinks[,1])
+water_consumption = createWater(mealsanddrinks[,1])
+electricity_consumption = createElectricity(mealsanddrinks[,1],outsidetemperature)
+paymentMethods = createPaymentMethods(timeandcustomers[,2],averageAge)
+revenues = get_revenues(mealsanddrinks[,1], mealsanddrinks[,2], paymentMethods[,1], paymentMethods[,2])
+
+dataset1 = data.frame("time" = times, "season" = season, "customers" = allcustomers, "average_Age" = averageAge, 
+                      "tips" = tips, "doors_opened" = doors_opened, "weather" = outsidetemperature, "restaurant_temperature" = restaurant_temperature, 
+                      mealsanddrinks, "gas_consumption" = gas_consumption, "water_comsumption" = water_consumption, 
+                      "electricity_consumption" = electricity_consumption, paymentMethods, revenues)
+
+dataset2 <- createoutliers(dataset1)

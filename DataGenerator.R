@@ -147,6 +147,16 @@ createSeason = function(dates){
   return (unlist(soy))
 }
 
+#turns season into string data type
+createSeason_nonnumeric = function(season){
+  sapply(season,function(x){
+    if (x == 1){"Spring"}
+    else if (x == 2){"Summer"}
+    else if (x == 3){"Autumn"}
+    else if(x == 4 ){"Winter"}
+  })
+}
+
 #create the temperature outside based on seasons 1-4, 14 hours a day
 createWeather = function(){
   #calculates the average temperature of every month
@@ -471,6 +481,7 @@ MDRangeMatrix = matrix(c(10,4,6,0,2,11,4,6,0,2,12,4,6,0,2,13,4,6,0,2,14,4,5,0,1,
 times = getTimes()
 allcustomers = createAllCustomers(cpct, mu1, mu2, sig1, sig2)
 season = createSeason(times)
+season_nonnumeric = createSeason_nonnumeric(season)
 timeandcustomers = data.frame(times, allcustomers)
 #timeslots = as.numeric(substr(timeandcustomers$times,12,13))
 averageAge = createAverageAge(allcustomers)
@@ -485,7 +496,7 @@ electricity_consumption = createElectricity(mealsanddrinks[,1],outsidetemperatur
 paymentMethods = createPaymentMethods(timeandcustomers[,2],averageAge)
 revenues = get_revenues(mealsanddrinks[,1], mealsanddrinks[,2], paymentMethods[,1], paymentMethods[,2])
 
-dataset1 = data.frame("time" = times, "season" = season, "customers" = allcustomers, "average_Age" = averageAge, 
+dataset1 = data.frame("time" = times, "season" = season_nonnumeric, "customers" = allcustomers, "average_Age" = averageAge, 
                       "tips" = tips, "doors_opened" = doors_opened, "weather" = outsidetemperature, "restaurant_temperature" = restaurant_temperature, 
                       mealsanddrinks, "gas_consumption" = gas_consumption, "water_comsumption" = water_consumption, 
                       "electricity_consumption" = electricity_consumption, paymentMethods, revenues)

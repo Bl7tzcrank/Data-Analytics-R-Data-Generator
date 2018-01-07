@@ -3,17 +3,12 @@ install.packages("clusterGeneration")
 install.packages("lubridate")
 install.packages("dbscan")
 
-#install.packages("plotly")
-#install.packages("ggplot2")
-
-
 library("clusterGeneration")
 library("dbscan")
 library("lubridate")
 library("chron")
-#library("ggplot2")
-#library("plotly")
 
+#Provides the time dimension
 getTimes <- function(){
   t <- seq(ISOdate(2000,1,1,hour = 10), ISOdate(2000,12,31, hour =24), "hours")
   t[hours(t)>=10]
@@ -90,46 +85,18 @@ createAllCustomers = function(cpct, mu1, mu2, sig1, sig2){
 }
 
 #creates the number of meals and drinks
+#the attributes are clustered, indicating that there are mainly two kinds of customers in terms of drinking/eating behaviour
 createMealsDrinks = function(customers){ #parameters are not necessary (?)
   meals = c()
   drinks = c()
   
-  #uniform distribution
-  #meals = c(runif(length(timeslots),7,12)*runif(length(timeslots),0.8,1.2),runif(length(timeslots),0,4)*runif(length(timeslots),0.8,1.2))*customers
-  #drinks = c(runif(length(timeslots),0,4)*runif(length(timeslots),0.8,1.2),runif(length(timeslots),7,12)*runif(length(timeslots),0.8,1.2))*customers
-  
   #random Cluster generation
-  var = genRandomClust(numClust=2,sepVal=0.2,numNonNoisy=2,clustszind=1,clustSizeEq=2562,lambdaLow = 0.5,ratioLambda = 2)
+  var = genRandomClust(numClust=2,sepVal=0.2,numNonNoisy=2,numNoisy=1,clustszind=1,clustSizeEq=2562,lambdaLow = 0.5, ratioLambda = 2)
   mealsDrinks=var$datList$test_1+min(var$datList$test_1)*-1
   
   meals=round(mealsDrinks[,1]*customers,0)
   drinks=round(mealsDrinks[,2]*customers,0)
   data = data.frame(meals, drinks)
-  #normal distribution
-  #meals = c(rnorm(length(timeslots),5,1),rnorm(length(timeslots),2,0.5))*customers
-  #drinks = c(rnorm(length(timeslots),2,0.8),rnorm(length(timeslots),10,1.5))*customers
-  
-  #Transfermatrix
-  #for (i in 1:length(timeslots)){
-  #  ranges = MDRangeMatrix[which(MDRangeMatrix[,1]==timeslots[i]),]
-  #  meals = append(meals,floor(customers[i]*(runif(1,ranges[2],ranges[3]))*(runif(1,0.6,1.4))))
-  #  drinks = append(drinks,floor(customers[i]*(runif(1,ranges[4],ranges[5]))*(runif(1,0.6,1.4))))
-  #}
-  #avgmeals = unlist(sapply(1:NROW(data), function(x){
-  #  if(customers[x] == 0){
-  #    return(0)
-  #  } else {
-  #    return(data[x,1]/customers[x])
-  #  }
-  #}))
-  
-  #avgdrinks = unlist(sapply(1:NROW(data), function(x){
-  #  if(customers[x] == 0){
-  #    return(0)
-  #  } else {
-  #    return(data[x,2]/customers[x])
-  #  }
-  #}))
   
   return(data)
 }
@@ -162,7 +129,7 @@ createWeather = function(){
   #calculates the average temperature of every month
   #we are assuming that the average temperature scaled from mai to april is distributed
   #like a sin(x)-function with mean of 11.5 and a factor of 12.5 to simulate
-  #temperatures between -1 and 24 ?C
+  #temperatures between -1 and 24 C
   monthlyavgtemperature = sapply(1:12, function(x){
     if(x < 5){
       11.5 - 12.5*sin(pi*((x+8)/6)-pi)
@@ -199,7 +166,7 @@ createWeather = function(){
     })[1:14]
   })))
   
-  return(hourlyavgtemperature)                    
+  return(round(hourlyavgtemperature,1))                    
 }
 
 #creates number of times the door was opened depending on number of customers and season
@@ -316,14 +283,16 @@ createElectricity = function(numberofmeals,weather){
 }
 
 #calculates restaurant temperature
-#Reasoning: The temperature restaurant depends on the number of guests and how often the door was opened.
-#The assumption is, that the if the door is opened, there is a negative effect on the restaurant temperature. Therefore the temperature decreases
-#initially. The more people the more does the temperature increase because the body heat (and also cooked meals) overrules the negative effect of
-#the door.
-#IDEA:How about also including the season. Depending on that there might be a positive or negative effect if the door is opened
-get_restaurant_temperature = function(number_of_customers,doors_opened){
+#Reasoning: The temperature restaurant depends on the number of guests, how often the door was opened and the temperature outside.
+#The assumption is, that the if the door has been opened there is an effect, which might be positive or negative on the restaurant temperature. 
+#This depends on the temperature difference of inside and outside, whereas the inside temperatur in maily influenced by the number of customers and
+#the minimum temperature by the airconditioning. The more people the more does the temperature increase because of the body heat 
+#(and also cooked meals) overrules the negative effect of the door.However due to a high difference in winter, there might be the case, that temperature is
+#decreasing although the restaurant is crowded.
+
+get_restaurant_temperature = function(number_of_customers,doors_opened,outsidetemperature){
   temperature_cust = x1*number_of_customers^3 - x2*number_of_customers^2 + number_of_customers/5 + fixed_temperature_for_cust
-  temperature_OD = y1*doors_opened^2 + fixed_temperature_for_opened_doors
+  temperature_OD = y1*doors_opened^2 + fixed_temperature_for_opened_doors + (outsidetemperature-temperature_cust)/400*doors_opened
   temperature = temperature_cust*(1-weight_factor_opened_doors)+temperature_OD*weight_factor_opened_doors
   return(round(temperature,1))
 }
@@ -432,6 +401,7 @@ createoutliers <- function(dataset){
 #####################################################end of functions###########################################
 
 #####################################################begin of data instances###########################################
+#parameters for number of customers
 mu1 <- 12  
 mu2 <- 20
 sig1 <- 1.5
@@ -458,9 +428,9 @@ e_curve = 1/3
 fixed_temperature_for_cust = 18.0
 fixed_temperature_for_opened_doors = 23.0
 weight_factor_opened_doors = 0.55
-x1 = 0.001
-x2 = 0.025
-y1 = -0.0025
+x1 = 0.00001
+x2 = 0.002
+y1 = -0.0001
 
 #parameters_tips
 average_tip = 2.5
@@ -476,8 +446,6 @@ variance_drink_price = 1.0
 max_revenue_percentage_boost = 1.4
 min_revenue_percentage_boost = 1.3
 
-MDRangeMatrix = matrix(c(10,4,6,0,2,11,4,6,0,2,12,4,6,0,2,13,4,6,0,2,14,4,5,0,1,15,0,2,6,8,16,0,2,6,8,17,0,2,6,8,18,4,6,1,2,19,4,6,1,2,20,4,6,1,2,21,0,2,7,10,22,0,2,7,10,23,0,2,7,10), nrow = 14, ncol = 5, byrow = TRUE )
-
 #####################################################end of data instances###########################################
 
 #####################################################begin of main part###########################################
@@ -492,7 +460,7 @@ averageAge = createAverageAge(allcustomers)
 tips=get_tips(timeandcustomers[,2],averageAge)
 doors_opened = createOpendoors(timeandcustomers[,2],season)
 outsidetemperature = createWeather()
-restaurant_temperature = get_restaurant_temperature(timeandcustomers[,2],doors_opened)
+restaurant_temperature = get_restaurant_temperature(timeandcustomers[,2],doors_opened,outsidetemperature)
 mealsanddrinks = createMealsDrinks(timeandcustomers[,2])
 gas_consumption = createGas(mealsanddrinks[,1])
 water_consumption = createWater(mealsanddrinks[,1],outsidetemperature)
@@ -506,3 +474,5 @@ dataset1 = data.frame("time" = times, "season" = season_nonnumeric, "customers" 
                       "electricity_consumption" = electricity_consumption, paymentMethods, revenues)
 
 dataset2 <- createoutliers(dataset1)
+
+plot(dataset2$customers,dataset2$restaurant_temperature)

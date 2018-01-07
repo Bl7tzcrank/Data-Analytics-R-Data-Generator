@@ -29,6 +29,7 @@ bimodalDistFunc <- function (n,cpct, mu1, mu2, sig1, sig2) {
   y <- y0*(1 - flag) + y1*flag 
 }
 
+#count the number of decimals
 decimalnumcount<-function(y){
   if(y%%1 != 0){
     x = toString(y)
@@ -88,6 +89,7 @@ createAllCustomers = function(cpct, mu1, mu2, sig1, sig2){
   return(customers)
 }
 
+#creates the number of meals and drinks
 createMealsDrinks = function(customers){ #parameters are not necessary (?)
   meals = c()
   drinks = c()
@@ -206,7 +208,7 @@ createGas = function(numberofmeals){
   
   gas <- sapply(numberofmeals,function(x){
     
-    (abs(round(rnorm(1,mean=x*500,sd=1000))))^(1/2)
+    (abs(round(rnorm(1,mean=x*g_mean_factor,sd=g_sd))))^(g_curve)
   })
   
   gas <- round(gas,2)
@@ -270,7 +272,7 @@ createPaymentMethods = function(customers, customerages){
 #computes the ampunt of water used per hour (liters); depends on number of meals; input mealsanddrinks[,1]
 createWater = function(numberofmeals){
   water <- sapply(numberofmeals,function(x){
-    (abs(round(rnorm(1,mean=x*10,sd=10))))^(2/3)
+    (abs(round(rnorm(1,mean=x*w_mean_factor,sd=w_sd))))^(w_curve)
   })
   water <- round(water,2)
   return(water)
@@ -281,7 +283,7 @@ createElectricity = function(numberofmeals,weather){
   
   electricitycooking <- sapply(numberofmeals,function(x){
     
-    (abs(round(rnorm(1,mean=x*100000,sd=500000))))^(1/3)
+    (abs(round(rnorm(1,mean=x*e_mean_factor,sd=e_sd))))^(e_curve)
   })
   # 1 kwh per degree lower then 20
   electricityheating <- sapply(weather, function(x){
@@ -378,6 +380,7 @@ createoutliers <- function(dataset){
           #print(paste0("Outlier1: ", adaptedoutlier))
           #print(paste0("Outlier2: ", dataset[i,k]))
           
+        # this section could be used for outliers without the data range (no need was decided)  
         }#else if(random == 1000){
         #for outliers without the data range
         #random <- round(runif(1,1,2))
@@ -417,6 +420,21 @@ sig1 <- 1.5
 sig2 <- 1.5
 cpct <- 0.5 
 n = floor(runif(1, 150, 250))
+
+#parameters_gas
+g_mean_factor = 500
+g_sd = 1000
+g_curve = 1/2
+
+#parameters_water
+w_mean_factor = 10
+w_sd = 200
+w_curve = 2/3
+
+#parameters_elec
+e_mean_factor = 100000
+e_sd = 500000
+e_curve = 1/3
 
 #parameters_restaurant_temperature
 fixed_temperature_for_cust = 18.0

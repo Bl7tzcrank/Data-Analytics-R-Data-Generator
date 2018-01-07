@@ -192,14 +192,18 @@ createWeather = function(){
   return(hourlyavgtemperature)                    
 }
 
-#creates number of times the door was opened
-createOpendoors = function(customers){
+#creates number of times the door was opened depending on number of customers and season
+createOpendoors = function(customers,season){
   
-  opendoors <- sapply(customers,function(x){
+  opendoors <- mapply(function(x,y){
     
-    (abs(round(rnorm(1,mean=x, sd = 2)))+1)*2
+    if (y == 4){b = 1}
+    else {b = y}
     
-  })
+    (abs(round(rnorm(1,mean=x*(b/2), sd = 2)))+1)*2
+    
+  },customers,season)
+  
   return (opendoors)
 }
 
@@ -285,10 +289,10 @@ createElectricity = function(numberofmeals,weather){
     
     (abs(round(rnorm(1,mean=x*e_mean_factor,sd=e_sd))))^(e_curve)
   })
-  # 1 kwh per degree lower then 20
+  # 10 kwh per degree lower then 20
   electricityheating <- sapply(weather, function(x){
     if(x < 20){
-      (20-x)*1
+      (20-x)*10
     }else{0}
   })
   
@@ -471,7 +475,7 @@ timeandcustomers = data.frame(times, allcustomers)
 #timeslots = as.numeric(substr(timeandcustomers$times,12,13))
 averageAge = createAverageAge(allcustomers)
 tips=get_tips(timeandcustomers[,2],averageAge)
-doors_opened = createOpendoors(timeandcustomers[,2])
+doors_opened = createOpendoors(timeandcustomers[,2],season)
 outsidetemperature = createWeather()
 restaurant_temperature = get_restaurant_temperature(timeandcustomers[,2],doors_opened)
 mealsanddrinks = createMealsDrinks(timeandcustomers[,2])

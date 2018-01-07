@@ -283,11 +283,15 @@ createPaymentMethods = function(customers, customerages){
   return(data.frame("card" = card, "cash" = cash))
 }
 
-#computes the ampunt of water used per hour (liters); depends on number of meals; input mealsanddrinks[,1]
-createWater = function(numberofmeals){
-  water <- sapply(numberofmeals,function(x){
-    (abs(round(rnorm(1,mean=x*w_mean_factor,sd=w_sd))))^(w_curve)
-  })
+#computes the ampunt of water used per hour (liters); depends on number of meals and weather(sprinkler); input mealsanddrinks[,1]
+createWater = function(numberofmeals,weather){
+  water <- mapply(function(x,y){
+    bw=1
+    if(y>20){
+      bw=1000*(y-20)
+    }
+    (abs(round(rnorm(1,mean=x*w_mean_factor,sd=w_sd)+bw)))^(w_curve)
+  },numberofmeals,weather)
   water <- round(water,2)
   return(water)
 }
@@ -491,7 +495,7 @@ outsidetemperature = createWeather()
 restaurant_temperature = get_restaurant_temperature(timeandcustomers[,2],doors_opened)
 mealsanddrinks = createMealsDrinks(timeandcustomers[,2])
 gas_consumption = createGas(mealsanddrinks[,1])
-water_consumption = createWater(mealsanddrinks[,1])
+water_consumption = createWater(mealsanddrinks[,1],outsidetemperature)
 electricity_consumption = createElectricity(mealsanddrinks[,1],outsidetemperature)
 paymentMethods = createPaymentMethods(timeandcustomers[,2],averageAge)
 revenues = get_revenues(mealsanddrinks[,1], mealsanddrinks[,2], paymentMethods[,1], paymentMethods[,2])

@@ -119,7 +119,7 @@ createMealsDrinks = function(customers){
   
   meals=round(mealsDrinks[,1]*customers,0)
   drinks=round(mealsDrinks[,2]*customers,0)
-  data = data.frame(meals, drinks)
+  data = data.frame("No meals" = meals, "No drinks" = drinks)
   
   return(data)
 }
@@ -280,7 +280,7 @@ createPaymentMethods = function(customers, customerages){
     }
   }
   
-  return(data.frame("card" = card, "cash" = cash))
+  return(data.frame("No transactions with card" = card, "No transactions with cash" = cash))
 }
 
 #Description: Computes the amount of water used per hour (liters)
@@ -345,9 +345,9 @@ get_restaurant_temperature = function(number_of_customers,outsidetemperature){
 #The tips of course heavily depend on the number of customers. In addition the older the customers, the higher the average tip.
 #Input: number_of_customers = vector of customer per hour, average_age = average age of customers per hour
 #Output: Vector with water consumption data in the restaurant per hour.
-get_tips = function(number_of_customers,average_age){
+get_tips = function(number_of_customers,averageAge){
   averageAge[which(is.na(averageAge))] = 0
-  tips = round((rnorm(length(number_of_customers),average_tip,variance_tip)+additional_tips_average_age*(average_age/max_age)),2)*number_of_customers 
+  tips = round((rnorm(length(number_of_customers),average_tip,variance_tip)+additional_tips_average_age*(averageAge/max_age)),2)*number_of_customers 
 }
 
 #Description: calculates revenue per hour
@@ -385,7 +385,7 @@ get_revenues = function(number_of_meals, number_of_drinks, card_payments,cash_pa
   })
   
   result = data.frame(round(revMeals+revDrinks,2),round(revMeals,2),round(revDrinks,2))
-  colnames(result) <- c("total_revenue","meal_revenue","drink_revenue")
+  colnames(result) <- c("Total revenue in EUR","Meal revenue in EUR","Drink revenue in EUR")
   return(result)
 }
 
@@ -493,10 +493,10 @@ create_dataset <- function(){
   paymentMethods = createPaymentMethods(timeandcustomers[,2],averageAge)
   revenues = get_revenues(mealsanddrinks[,1], mealsanddrinks[,2], paymentMethods[,1], paymentMethods[,2])
 
-  dataset1 = data.frame("time" = times, "season" = season_nonnumeric, "customers" = allcustomers, "average_Age" = averageAge, 
-                      "tips" = tips, "doors_opened" = doors_opened, "weather" = outsidetemperature, "restaurant_temperature" = restaurant_temperature, 
-                      mealsanddrinks, "gas_consumption" = gas_consumption, "water_comsumption" = water_consumption, 
-                      "electricity_consumption" = electricity_consumption, paymentMethods, revenues)
+  dataset1 = data.frame("DateTime" = times, "Season" = season_nonnumeric, "No Customers" = allcustomers, "Average age of customers" = averageAge, 
+                      "Tips in EUR" = tips, "No times door opened" = doors_opened, "Outside temperatur in Celsius" = outsidetemperature, "Restaurant temperature in Celsius" = restaurant_temperature, 
+                      mealsanddrinks, "Gas consumption in kwh" = gas_consumption, "Water comsumption in liter" = water_consumption, 
+                      "Electricity consumption in kwh" = electricity_consumption, paymentMethods, revenues)
 
   dataset2 <- createoutliers(dataset1)
   print("Data sets created")

@@ -1,21 +1,29 @@
+#################### BEGIN PACK&LIB ####################
 install.packages("chron")
 install.packages("clusterGeneration")
 install.packages("lubridate")
-install.packages("dbscan")
 
 library("clusterGeneration")
-library("dbscan")
 library("lubridate")
 library("chron")
+####################  END PACK&LIB  ####################
 
-#Provides the time dimension
+#################### BEGIN FUNCTIONS ####################
+
+###Functions related to customer creation###
+
+#Description: Provides the time dimension for the data set. To be more specific the function provides dates for one year, each date having 14 hours (working hours)
+#Input: none
+#Output: Time vector
 getTimes <- function(){
-  t <- seq(ISOdate(2000,1,1,hour = 10), ISOdate(2000,12,31, hour =24), "hours")
-  t[hours(t)>=10]
+  t <- seq(ISOdate(AnalyzedYear,1,1,hour = startOfWork), ISOdate(AnalyzedYear,12,31, hour = endOfWork), "hours")
+  t[hours(t)>=startOfWork]
 }
 
-#creates bimodal random values by merging two sets of randonly normal distributed values
-#n = number of values, cpct = 0.5 (probability of choosing of one of the sets)
+#Description: Creates bimodal random values by merging two sets of randonly normal distributed values to simulate two peaks (lunch,dinner).
+#Input: n = number of values, cpct = 0.5 (probability of choosing of one of the sets), mu1 = time of lunch peack, mu2 = time of dinner peak, sig1 = variance of lunch time
+#sig2 = variance of dinner time
+#Output: Initial number of customers (not assigned to a specific point in time)
 bimodalDistFunc <- function (n,cpct, mu1, mu2, sig1, sig2) {
   y0 <- rnorm(n,mean=mu1, sd = sig1)
   y1 <- rnorm(n,mean=mu2, sd = sig2)
@@ -24,7 +32,9 @@ bimodalDistFunc <- function (n,cpct, mu1, mu2, sig1, sig2) {
   y <- y0*(1 - flag) + y1*flag 
 }
 
-#count the number of decimals
+#Description: Counts the number of decimals
+#Input: y = numeric value to be analyzed
+#Output: Decimal count
 decimalnumcount<-function(y){
   if(y%%1 != 0){
     x = toString(y)
@@ -37,33 +47,41 @@ decimalnumcount<-function(y){
   }
 }
 
-#cut off the values which are not in the range of 10 and 23
+#Description: Cut off the values which are not in the range of 10 and 23 (meaning not in the working hours)
+#Input: x = data of the bimodal customer data set
+#Output: Cleaned customer data set
 filterbimodaldata = function(x){ 
   temp = x
-  if(max(x) > 23){
-    temp = temp[-which(temp>23)]
-  } else if(min(temp)<10){
-    temp = temp[-which(temp<10)]
+  if(max(x) > (endOfWork-1)){
+    temp = temp[-which(temp>(endOfWork-1))]
+  } else if(min(temp)<startOfWork){
+    temp = temp[-which(temp<startOfWork)]
   }
   return(temp)
 }
 
-#number of customers per day; e.g. (12,12,15,16,11,...)
+#Description: Creates number of customers per day; e.g. (12,12,15,16,11,...)
+#Input: n = number of values, cpct = 0.5 (probability of choosing of one of the sets), mu1 = time of lunch peack, mu2 = time of dinner peak, sig1 = variance of lunch time
+#sig2 = variance of dinner time
+#Output: Customer data set
 createCustomerPerDay = function(n,cpct, mu1, mu2, sig1, sig2){
   data = bimodalDistFunc(n,cpct, mu1, mu2, sig1, sig2)
-  floordata = floor(data) #round down
-  sorteddata = filterbimodaldata(floordata) #cut off data in range 10 to 23
+  floordata = floor(data)
+  sorteddata = filterbimodaldata(floordata)
   return(sorteddata)
 }
 
-#output: 14 rows of distribution for one day (10,20,21,44,75,54,...) without the time. Maximum capacity of 60.
+#Description: Creates all customers and checks whether restriction "capacity =< 60" has been violated.
+#Input: n = number of values, cpct = 0.5 (probability of choosing of one of the sets), mu1 = time of lunch peack, mu2 = time of dinner peak, sig1 = variance of lunch time
+#sig2 = variance of dinner time
+#Output: 14 rows of distribution for one day (10,20,21,44,75,54,...) without the time.
 createCustomerTimeFrequency = function(n,cpct, mu1, mu2, sig1, sig2){
   allcustomers = as.data.frame(table(createCustomerPerDay(n,cpct, mu1, mu2, sig1, sig2)))
   freq = c()
   for (i in 10:23){
     if(length(which(allcustomers[,1] == i)) > 0){
-      if (allcustomers[which(allcustomers[,1] == i),2] >60){
-        freq = append(freq, 60)
+      if (allcustomers[which(allcustomers[,1] == i),2] >maxCapacity){
+        freq = append(freq, maxCapacity)
       }else{
         freq = append(freq, allcustomers[which(allcustomers[,1] == i),2])
       }
@@ -73,24 +91,29 @@ createCustomerTimeFrequency = function(n,cpct, mu1, mu2, sig1, sig2){
   }
   return(freq)
 }
-
-#Doing the previous function 365 times. Returns the whole customers data (365 days and 14 entries a day)
+#Description: Returns the whole customers data set (365 days and 14 entries a day)
+#Input: n = number of values, cpct = 0.5 (probability of choosing of one of the sets), mu1 = time of lunch peack, mu2 = time of dinner peak, sig1 = variance of lunch time
+#sig2 = variance of dinner time
+#Output: Number of customers per hour
 createAllCustomers = function(cpct, mu1, mu2, sig1, sig2){
   customers = c()
   for(i in 1:366){
-    n = floor(runif(1, 150, 250)) #randomly choose a number of customer for a day
+    n = floor(runif(1, minCustomerPerDay, maxCustomerPerDay)) #randomly choose a number of customer for a day
     customers = append(customers, createCustomerTimeFrequency(n,cpct, mu1, mu2, sig1, sig2))
   }
   return(customers)
 }
 
-#creates the number of meals and drinks
-#the attributes are clustered, indicating that there are mainly two kinds of customers in terms of drinking/eating behaviour
-createMealsDrinks = function(customers){ #parameters are not necessary (?)
+###End of Functions related to customer creation###
+
+#Description: Creates the number of meals and drinks per hour based on random cluster generator and number of customers. 
+#The attributes are clustered, indicating that there are mainly two kinds of customers in terms of drinking/eating behaviour
+#Input: customers = customer vector
+#Output: Number of drinks and meals per hour
+createMealsDrinks = function(customers){
   meals = c()
   drinks = c()
   
-  #random Cluster generation
   var = genRandomClust(numClust=2,sepVal=0.2,numNonNoisy=2,numNoisy=1,clustszind=1,clustSizeEq=2562,lambdaLow = 0.5, ratioLambda = 2)
   mealsDrinks=var$datList$test_1+min(var$datList$test_1)*-1
   
@@ -101,8 +124,10 @@ createMealsDrinks = function(customers){ #parameters are not necessary (?)
   return(data)
 }
 
-#creates the season (1-4) for every timestamp and returns it as a vector
-#1: spring; 2: summer; 3: autumn; 4: winter
+#Description: Creates the season (1-4) for every timestamp and returns it as a vector.
+#The attributes are clustered, indicating that there are mainly two kinds of customers in terms of drinking/eating behaviour
+#Input: Timestamps
+#Output: Numeric value for season (1: spring; 2: summer; 3: autumn; 4: winter)
 createSeason = function(dates){
   moy <- month(dates)
   soy <- sapply(moy, function(x){
@@ -114,7 +139,9 @@ createSeason = function(dates){
   return (unlist(soy))
 }
 
-#turns season into string data type
+#Description: Turns season into string data type
+#Input: Numeric value for season
+#Output: Non-numeric value for season (1: spring; 2: summer; 3: autumn; 4: winter)
 createSeason_nonnumeric = function(season){
   sapply(season,function(x){
     if (x == 1){"Spring"}
@@ -124,7 +151,9 @@ createSeason_nonnumeric = function(season){
   })
 }
 
-#create the temperature outside based on seasons 1-4, 14 hours a day
+#Description: Create the temperature outside based on seasons 1-4, 14 hours a day
+#Input: None
+#Output: Vector with outside temperatur values for every hour of the year.
 createWeather = function(){
   #calculates the average temperature of every month
   #we are assuming that the average temperature scaled from mai to april is distributed
@@ -169,22 +198,23 @@ createWeather = function(){
   return(round(hourlyavgtemperature,1))                    
 }
 
-#creates number of times the door was opened depending on number of customers and season
+#Description: Creates number of times the door was opened depending on number of customers and season
+#Input: customers = vector of customer per hour, season = vector of season per hour
+#Output: Vector with values for times the door has been opened within one hour.
 createOpendoors = function(customers,season){
   
   opendoors <- mapply(function(x,y){
-    
     if (y == 4){b = 1}
     else {b = y}
-    
     (abs(round(rnorm(1,mean=x*(b/2), sd = 2)))+1)*2
-    
   },customers,season)
   
   return (opendoors)
 }
 
-#computes the amount of gas used per hour (kwh); depends on number of meals; input mealsanddrinks[,1]
+#Description: Computes the amount of gas used per hour (kwh) based on number of meals
+#Input: numberofmeals = number of meals per hour
+#Output: Vector with gas consumption per hour.
 createGas = function(numberofmeals){
   
   gas <- sapply(numberofmeals,function(x){
@@ -196,9 +226,10 @@ createGas = function(numberofmeals){
   return(gas)
 }
 
-
-#generates the average age of the customers for each hour.
-#Assumption: younger people visit our restaurant rather late in comparison to older people.
+#Description: Generates the average age of the customers for each hour.
+#Assumption is that younger people visit our restaurant rather late in comparison to older people.
+#Input: customers = vector of customer per hour
+#Output: Vector with average age of customers in the restaurant per hour.
 createAverageAge = function(customers){
   numberofentries = NROW(customers)
   
@@ -225,8 +256,10 @@ createAverageAge = function(customers){
   })))
 }
 
-#creates the number of paymentmethods per hour. Assumption:
-#older people tend to pay cash and younger people with cards.
+#Description: Creates the number of paymentmethods per hour. 
+#Assumption is that older people tend to pay cash and younger people with cards.
+#Input: customers = vector of customer per hour, customerages = average age of customers per hour
+#Output: Vector of card and cash transactions in the restaurant per hour.
 createPaymentMethods = function(customers, customerages){
   maxAge = max(customerages[-which(is.na(customerages))])
   card = c()
@@ -250,7 +283,10 @@ createPaymentMethods = function(customers, customerages){
   return(data.frame("card" = card, "cash" = cash))
 }
 
-#computes the ampunt of water used per hour (liters); depends on number of meals and weather(sprinkler); input mealsanddrinks[,1]
+#Description: Computes the amount of water used per hour (liters)
+#It depends on number of meals and weather (sprinkler)
+#Input: numberofmeals = number of meals per hour, weather = outside temperature
+#Output: Vector with water consumption data in the restaurant per hour.
 createWater = function(numberofmeals,weather){
   water <- mapply(function(x,y){
     bw=1
@@ -263,7 +299,10 @@ createWater = function(numberofmeals,weather){
   return(water)
 }
 
-#computes the ampunt of electricity used per hour (kwh); depends on number of meals and weather outside; input mealsanddrinks[,1]
+#Description: Computes the amount of electricity used per hour (kwh)
+#It depends on number of meals and weather outside
+#Input: numberofmeals = number of meals per hour, weather = outside temperature
+#Output: Vector with power consumption data in the restaurant per hour.
 createElectricity = function(numberofmeals,weather){
   
   electricitycooking <- sapply(numberofmeals,function(x){
@@ -282,35 +321,45 @@ createElectricity = function(numberofmeals,weather){
   return (electricity)
 }
 
-#calculates restaurant temperature
-#Reasoning: The temperature restaurant depends on the number of guests, how often the door was opened and the temperature outside.
-#The assumption is, that the if the door has been opened there is an effect, which might be positive or negative on the restaurant temperature. 
-#This depends on the temperature difference of inside and outside, whereas the inside temperatur in maily influenced by the number of customers and
-#the minimum temperature by the airconditioning. The more people the more does the temperature increase because of the body heat 
-#(and also cooked meals) overrules the negative effect of the door.However due to a high difference in winter, there might be the case, that temperature is
-#decreasing although the restaurant is crowded.
-
-get_restaurant_temperature = function(number_of_customers,doors_opened,outsidetemperature){
-  temperature_cust = x1*number_of_customers^3 - x2*number_of_customers^2 + number_of_customers/5 + fixed_temperature_for_cust
-  temperature_OD = y1*doors_opened^2 + fixed_temperature_for_opened_doors + (outsidetemperature-temperature_cust)/400*doors_opened
-  temperature = temperature_cust*(1-weight_factor_opened_doors)+temperature_OD*weight_factor_opened_doors
-  return(round(temperature,1))
+#Description: Calculates the restaurant temperature
+#It depends on number of customers and the outside temperatur
+#Input: customers = vector of customer per hour, weather = outside temperature
+#Output: Vector with water consumption data in the restaurant per hour.
+get_restaurant_temperature = function(number_of_customers,outsidetemperature){
+  #Scales number of customers and outside temperatur to interval [0,1]
+  customer_scale = max(number_of_customers)-min(number_of_customers)
+  scaled_customer = (number_of_customers-min(number_of_customers))/customer_scale
+  outsidetemperature_scaler = max(outsidetemperature)-min(outsidetemperature)
+  scaled_outsidetemperature = (outsidetemperature-min(outsidetemperature))/outsidetemperature_scaler
+  
+  #Density function is calculated
+  restaurant_temperature_vector=((4/3)*scaled_outsidetemperature^3-scaled_customer+1)
+  
+  #Values are adjusted to fit to business case
+  restaurant_temperature = restaurant_temperature_vector*2+20
+  
+  return(round(restaurant_temperature,1))
 }
 
-#calculates tips_earned
-#Reasoning:The tips of course heavily depend on the number of customers. In addition the older the customers, the higher the average tip.
+#Description: Calculates earned tips per hour
+#The tips of course heavily depend on the number of customers. In addition the older the customers, the higher the average tip.
+#Input: number_of_customers = vector of customer per hour, average_age = average age of customers per hour
+#Output: Vector with water consumption data in the restaurant per hour.
 get_tips = function(number_of_customers,average_age){
   averageAge[which(is.na(averageAge))] = 0
   tips = round((rnorm(length(number_of_customers),average_tip,variance_tip)+additional_tips_average_age*(average_age/max_age)),2)*number_of_customers 
 }
 
-#calculates revenue
-#Reasoning: Revenues depend on consumed meals and drinks. Furthermore customers paying with cards tend to order more expensive meals than customers
-#paying cash.
+#Description: calculates revenue per hour
+#Revenues depend on consumed meals and drinks. Furthermore there is a light trend indicating that customers paying with cards tend to order more expensive meals than customers paying cash.
+#Input: number_of_meals = vector of meals per hour, number_of_drinks = vector of drinks per hour, card_payments = = vector of card transactions per hour
+#cash_payments = vector of cash transactions per hour
+#Output: Vector with revenues of the restaurant per hour.
 get_revenues = function(number_of_meals, number_of_drinks, card_payments,cash_payments){
   revenue_meals = rnorm(length(number_of_meals),average_price_meal,variance_meal_price)*number_of_meals
   revenue_drinks = rnorm(length(number_of_drinks),average_price_drink,variance_drink_price)*number_of_drinks
   
+  #Check whether there were more card transactions than cash transactions
   paymentbinaer = apply(data.frame(card_payments, cash_payments, rep(1,times=length(cash_payments))),1,function(X){
     if(X[1]>X[2]){
       X[3]=1
@@ -340,7 +389,10 @@ get_revenues = function(number_of_meals, number_of_drinks, card_payments,cash_pa
   return(result)
 }
 
-#1%-chance is stays in data range, 1%-chance that is doesnt stay in data range
+#Description: Create outliers for the entire data set
+#There is a 1%-chance that it stays in data range and a 1%-chance that is doesnt stay in data range
+#Input: Data set without outliers
+#Output: Data set with outliers.
 createoutliers <- function(dataset){
   
   for(k in 3:ncol(dataset)){
@@ -353,54 +405,20 @@ createoutliers <- function(dataset){
       if(!is.na(dataset[i,k])){
         random <- round(runif(1,1,1000))
         if(random == 999){
-          #for outliers within the data range
-          
-          #print(paste0("Min: ", minX))
-          #print(paste0("Max: ", maxX))
-          
+
           randomoutlier = runif(1,minX,maxX)
-          
           adaptedoutlier = trunc(randomoutlier*10^decimalnumcount(maxX))/10^decimalnumcount(maxX)
-          #print(paste0("Original: ", dataset[i,k]))
           dataset[i,k] = adaptedoutlier
-          
-          #print(paste0("Outlier1: ", adaptedoutlier))
-          #print(paste0("Outlier2: ", dataset[i,k]))
-          
-        # this section could be used for outliers without the data range (no need was decided)  
-        }#else if(random == 1000){
-        #for outliers without the data range
-        #random <- round(runif(1,1,2))
-        
-        #print(paste0("ExtremeOriginal: ", dataset[i,k]))
-        #if(random == 1){
-        #smaller
-        #randomoutlier = rnorm(1,minX+maxX,minX+maxX)
-        #adaptedoutlier = trunc(randomoutlier*10^decimalnumcount(minX))/10^decimalnumcount(minX)
-        #dataset[i,k] = minX - adaptedoutlier
-        #}else{
-        #bigger
-        #randomoutlier = rnorm(1,minX+maxX,minX+maxX)
-        #adaptedoutlier = trunc(randomoutlier*10^decimalnumcount(maxX))/10^decimalnumcount(maxX)
-        #dataset[i,k] = maxX + adaptedoutlier
+        }
       }
-      #print(paste0("Min: ", minX))
-      #print(paste0("Max: ", maxX))
-      #print(paste0("Random: ", randomoutlier))
-      #print(paste0("ExtremeDifference: ", adaptedoutlier))
-      #print(paste0("ExtremeOutlier: ", dataset[i,k]))
-      #}
-      #}
-      
     }
   }
-  
   return(dataset)
 }
 
-#####################################################end of functions###########################################
+#################### END FUNCTIONS ####################
 
-#####################################################begin of data instances###########################################
+#################### DATA INSTANCES ####################
 #parameters for number of customers
 mu1 <- 12  
 mu2 <- 20
@@ -408,6 +426,12 @@ sig1 <- 1.5
 sig2 <- 1.5
 cpct <- 0.5 
 n = floor(runif(1, 150, 250))
+maxCapacity = 60
+AnalyzedYear = 2000
+startOfWork = 10
+endOfWork = 24
+minCustomerPerDay = 150
+maxCustomerPerDay = 250
 
 #parameters_gas
 g_mean_factor = 500
@@ -446,33 +470,39 @@ variance_drink_price = 1.0
 max_revenue_percentage_boost = 1.4
 min_revenue_percentage_boost = 1.3
 
-#####################################################end of data instances###########################################
+#################### END DATA INSTANCES ####################
 
-#####################################################begin of main part###########################################
+####################   MAIN FUNCTION   ####################
 
-times = getTimes()
-allcustomers = createAllCustomers(cpct, mu1, mu2, sig1, sig2)
-season = createSeason(times)
-season_nonnumeric = createSeason_nonnumeric(season)
-timeandcustomers = data.frame(times, allcustomers)
-#timeslots = as.numeric(substr(timeandcustomers$times,12,13))
-averageAge = createAverageAge(allcustomers)
-tips=get_tips(timeandcustomers[,2],averageAge)
-doors_opened = createOpendoors(timeandcustomers[,2],season)
-outsidetemperature = createWeather()
-restaurant_temperature = get_restaurant_temperature(timeandcustomers[,2],doors_opened,outsidetemperature)
-mealsanddrinks = createMealsDrinks(timeandcustomers[,2])
-gas_consumption = createGas(mealsanddrinks[,1])
-water_consumption = createWater(mealsanddrinks[,1],outsidetemperature)
-electricity_consumption = createElectricity(mealsanddrinks[,1],outsidetemperature)
-paymentMethods = createPaymentMethods(timeandcustomers[,2],averageAge)
-revenues = get_revenues(mealsanddrinks[,1], mealsanddrinks[,2], paymentMethods[,1], paymentMethods[,2])
+create_dataset <- function(){
+  print("Data sets are created...")
+  times = getTimes()
+  allcustomers = createAllCustomers(cpct, mu1, mu2, sig1, sig2)
+  season = createSeason(times)
+  season_nonnumeric = createSeason_nonnumeric(season)
+  timeandcustomers = data.frame(times, allcustomers)
+  averageAge = createAverageAge(allcustomers)
+  tips=get_tips(timeandcustomers[,2],averageAge)
+  doors_opened = createOpendoors(timeandcustomers[,2],season)
+  outsidetemperature = createWeather()
+  restaurant_temperature = get_restaurant_temperature(timeandcustomers[,2],outsidetemperature)
+  mealsanddrinks = createMealsDrinks(timeandcustomers[,2])
+  gas_consumption = createGas(mealsanddrinks[,1])
+  water_consumption = createWater(mealsanddrinks[,1],outsidetemperature)
+  electricity_consumption = createElectricity(mealsanddrinks[,1],outsidetemperature)
+  paymentMethods = createPaymentMethods(timeandcustomers[,2],averageAge)
+  revenues = get_revenues(mealsanddrinks[,1], mealsanddrinks[,2], paymentMethods[,1], paymentMethods[,2])
 
-dataset1 = data.frame("time" = times, "season" = season_nonnumeric, "customers" = allcustomers, "average_Age" = averageAge, 
+  dataset1 = data.frame("time" = times, "season" = season_nonnumeric, "customers" = allcustomers, "average_Age" = averageAge, 
                       "tips" = tips, "doors_opened" = doors_opened, "weather" = outsidetemperature, "restaurant_temperature" = restaurant_temperature, 
                       mealsanddrinks, "gas_consumption" = gas_consumption, "water_comsumption" = water_consumption, 
                       "electricity_consumption" = electricity_consumption, paymentMethods, revenues)
 
-dataset2 <- createoutliers(dataset1)
+  dataset2 <- createoutliers(dataset1)
+  print("Data sets created")
+  return(dataset2)
+}
 
-plot(dataset2$customers,dataset2$restaurant_temperature)
+final_dataset = create_dataset()
+
+#################### END MAIN FUNCTION ####################

@@ -10,44 +10,46 @@
 
  Number of data points >> 5124
 
- Number of dimensions >> 2
+ Number of dimensions >> 3
 
- Number of noisy dimensions >> 0
+ Number of noisy dimensions >> 1
 
  noisy variables >>
-0
+1
 
  Number of outliers >> 0
 
  initial eigenvalues for each cluster >> 
  (rows correspond to clusters)
-0.783 0.888
-0.944 0.801
+0.85 0.748
+0.839 1
 
  Mean vectors and covariance matrices before rotation --- 1th cluster >>
 
  mean vector (mu'=Q*mu)>>
--2.778 0
+-2.704 0 0
 
  covariance matrix (Sigma'=Q*Sigma*t(Q))>>
 
-0.867 -0.042
--0.042 0.804
+0.786 0.049 0
+0.049 0.813 0
+0 0 1.864
 
  Mean vectors and covariance matrices before rotation --- 2th cluster >>
 
  mean vector (mu'=Q*mu)>>
-2.778 0
+2.704 0 0
 
  covariance matrix (Sigma'=Q*Sigma*t(Q))>>
 
-0.92 0.054
-0.054 0.825
+0.909 -0.08 0
+-0.08 0.929 0
+0 0 1.864
 
  Final eigenvalues for each cluster >> 
  (rows correspond to clusters)
-0.888 0.783
-0.944 0.801
+1.864 0.85 0.748
+1.864 1 0.839
 
  *************************************************
 
@@ -57,33 +59,35 @@
 
 
  The orthogonal matrix Q >>
-0.825 0.565
-0.565 -0.825
+0.142 0.99
+0.99 -0.142
 
  Mean vectors and covariance matrices after rotation --- 1th cluster >>
 
  mean vector (mu'=Q*mu)>>
--1.57 -2.293
+0 -2.677 -0.383
 
  covariance matrix (Sigma'=Q*Sigma*t(Q))>>
 
-0.863 0.045
-0.045 0.807
+1.864 0 0
+0 0.772 0.043
+0 0.043 0.826
 
  Mean vectors and covariance matrices after rotation --- 2th cluster >>
 
  mean vector (mu'=Q*mu)>>
-1.57 2.293
+0 2.677 0.383
 
  covariance matrix (Sigma'=Q*Sigma*t(Q))>>
 
-0.805 0.025
-0.025 0.94
+1.864 0 0
+0 0.932 -0.079
+0 -0.079 0.906
 
  Final eigenvalues for each cluster >> 
  (rows correspond to clusters)
-0.888 0.783
-0.944 0.801
+1.864 0.85 0.748
+1.864 1 0.839
 
  theoretical Separation index matrix >>
 
@@ -93,14 +97,14 @@
  theoretical projection directions >>
 
 **** cluster 1 and 2
-0.57 0.821
+0 0.988 0.157
 
  empirical Separation index matrix (alpha= 0.05 )>>
 
--1 0.201
-0.201 -1
+-1 0.197
+0.197 -1
 
  empirical projection directions >>
 
 **** cluster 1 and 2
-0.55 0.835
+0.009 0.987 0.159

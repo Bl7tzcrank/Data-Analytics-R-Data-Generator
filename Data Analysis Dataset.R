@@ -7,11 +7,13 @@ data02 = get(load("Datasets/data_02.RData"))
 
 #1.1 Exploratory Data Analysis#
 
-#1.2 Outlier detection#
+#1.2 Data Transformation#
 
-#1.3 Outlier removal#
+#1.3 Outlier detection#
 
-#1.3 Testing for normal distribution#
+#1.4 Outlier removal#
+
+#1.5 Testing for normal distribution#
 
 #2. Dimensionality Reduction#
 

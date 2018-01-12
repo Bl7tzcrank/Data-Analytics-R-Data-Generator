@@ -11,9 +11,18 @@ cluster nearestClust nearestSep farthestClust farthestSep medianSep fileName
 Empirical separation information data frame>>>>>>>>>>>
 
 cluster nearestClust nearestSep farthestClust farthestSep medianSep fileName
+<<<<<<< HEAD
 1	2	0.202	2	0.202	0.202	test_1
 2	1	0.202	1	0.202	0.202	test_1
 1	2	0.206	2	0.206	0.206	test_2
 2	1	0.206	1	0.206	0.206	test_2
 1	2	0.199	2	0.199	0.199	test_3
 2	1	0.199	1	0.199	0.199	test_3
+=======
+1	2	0.197	2	0.197	0.197	test_1
+2	1	0.197	1	0.197	0.197	test_1
+1	2	0.2	2	0.2	0.2	test_2
+2	1	0.2	1	0.2	0.2	test_2
+1	2	0.183	2	0.183	0.183	test_3
+2	1	0.183	1	0.183	0.183	test_3
+>>>>>>> e271018e0987091473473a9c3d30383efa80dfed

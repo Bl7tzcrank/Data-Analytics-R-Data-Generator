@@ -15,18 +15,28 @@
  Number of noisy dimensions >> 1
 
  noisy variables >>
+<<<<<<< HEAD
 1
+=======
+3
+>>>>>>> e271018e0987091473473a9c3d30383efa80dfed
 
  Number of outliers >> 0
 
  initial eigenvalues for each cluster >> 
  (rows correspond to clusters)
+<<<<<<< HEAD
 0.794 0.755
 0.954 0.781
+=======
+0.931 0.946
+0.765 0.6
+>>>>>>> e271018e0987091473473a9c3d30383efa80dfed
 
  Mean vectors and covariance matrices before rotation --- 1th cluster >>
 
  mean vector (mu'=Q*mu)>>
+<<<<<<< HEAD
 -2.703 0 0
 
  covariance matrix (Sigma'=Q*Sigma*t(Q))>>
@@ -34,10 +44,20 @@
 0.763 0.016 0
 0.016 0.787 0
 0 0 7.92
+=======
+-2.678 0 0
+
+ covariance matrix (Sigma'=Q*Sigma*t(Q))>>
+
+0.935 -0.007 0
+-0.007 0.941 0
+0 0 6.024
+>>>>>>> e271018e0987091473473a9c3d30383efa80dfed
 
  Mean vectors and covariance matrices before rotation --- 2th cluster >>
 
  mean vector (mu'=Q*mu)>>
+<<<<<<< HEAD
 2.703 0 0
 
  covariance matrix (Sigma'=Q*Sigma*t(Q))>>
@@ -50,6 +70,20 @@
  (rows correspond to clusters)
 7.92 0.794 0.755
 7.92 0.954 0.781
+=======
+2.678 0 0
+
+ covariance matrix (Sigma'=Q*Sigma*t(Q))>>
+
+0.732 0.066 0
+0.066 0.633 0
+0 0 6.024
+
+ Final eigenvalues for each cluster >> 
+ (rows correspond to clusters)
+6.024 0.946 0.931
+6.024 0.765 0.6
+>>>>>>> e271018e0987091473473a9c3d30383efa80dfed
 
  *************************************************
 
@@ -59,12 +93,18 @@
 
 
  The orthogonal matrix Q >>
+<<<<<<< HEAD
 0.969 0.248
 0.248 -0.969
+=======
+0.435 0.901
+0.901 -0.435
+>>>>>>> e271018e0987091473473a9c3d30383efa80dfed
 
  Mean vectors and covariance matrices after rotation --- 1th cluster >>
 
  mean vector (mu'=Q*mu)>>
+<<<<<<< HEAD
 0 -0.67 -2.619
 
  covariance matrix (Sigma'=Q*Sigma*t(Q))>>
@@ -72,10 +112,20 @@
 7.92 0 0
 0 0.778 -0.019
 0 -0.019 0.772
+=======
+-1.164 -2.411 0
+
+ covariance matrix (Sigma'=Q*Sigma*t(Q))>>
+
+0.935 -0.007 0
+-0.007 0.942 0
+0 0 6.024
+>>>>>>> e271018e0987091473473a9c3d30383efa80dfed
 
  Mean vectors and covariance matrices after rotation --- 2th cluster >>
 
  mean vector (mu'=Q*mu)>>
+<<<<<<< HEAD
 0 0.67 2.619
 
  covariance matrix (Sigma'=Q*Sigma*t(Q))>>
@@ -88,6 +138,20 @@
  (rows correspond to clusters)
 7.92 0.794 0.755
 7.92 0.954 0.781
+=======
+1.164 2.411 0
+
+ covariance matrix (Sigma'=Q*Sigma*t(Q))>>
+
+0.703 0.08 0
+0.08 0.662 0
+0 0 6.024
+
+ Final eigenvalues for each cluster >> 
+ (rows correspond to clusters)
+6.024 0.946 0.931
+6.024 0.765 0.6
+>>>>>>> e271018e0987091473473a9c3d30383efa80dfed
 
  theoretical Separation index matrix >>
 
@@ -97,14 +161,27 @@
  theoretical projection directions >>
 
 **** cluster 1 and 2
+<<<<<<< HEAD
 0 0.289 0.957
 
  empirical Separation index matrix (alpha= 0.05 )>>
 
 -1 0.199
 0.199 -1
+=======
+0.398 0.918 0
+
+ empirical Separation index matrix (alpha= 0.05 )>>
+
+-1 0.183
+0.183 -1
+>>>>>>> e271018e0987091473473a9c3d30383efa80dfed
 
  empirical projection directions >>
 
 **** cluster 1 and 2
+<<<<<<< HEAD
 -0.001 0.271 0.963
+=======
+0.369 0.929 -0.004
+>>>>>>> e271018e0987091473473a9c3d30383efa80dfed

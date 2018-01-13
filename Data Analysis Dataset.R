@@ -1,11 +1,12 @@
 ####R-Script for analysing the given dataset####
-data14 = read.csv("Datasets/data_14.csv")
+data_set_17 = read.csv("Datasets/data_17.csv")
 
 #1. Data Pre-processing#
 
 #1.1 Exploratory Data Analysis#
-
-#1.2 Data Transformation#
+summary(data_set_17)
+str(data_set_17)
+#1.2 Data Transformation# not required
 
 #1.3 Outlier detection#
 
@@ -16,3 +17,6 @@ data14 = read.csv("Datasets/data_14.csv")
 #2. Dimensionality Reduction#
 
 #3. Cluster Analysis#
+
+
+

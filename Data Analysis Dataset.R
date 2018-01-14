@@ -1,4 +1,5 @@
 ####R-Script for analysing the given dataset####
+<<<<<<< HEAD
 ####Data set description###
 # Data Generator for the present use-case
 # The idea is to create a dataset of bought presents in 2017 in the "Münsterland"
@@ -20,6 +21,9 @@
 
 #Read data set
 data_set_17 = read.csv("Datasets/data_17.csv")
+=======
+data = read.csv("Datasets/data_17.csv")
+>>>>>>> 2e31d331757f6942f648f7059f025cc6c36e0b84
 
 #Import libraries
 #install.packages("GGally")
@@ -27,14 +31,21 @@ data_set_17 = read.csv("Datasets/data_17.csv")
 #1. Data Pre-processing#
 
 #1.1 Exploratory Data Analysis#
+<<<<<<< HEAD
 str(data_set_17)
 summary(data_set_17)
 pairs(data_set_17)
 #ggpairs(data_set_17[-c(1,3,11,15)])
 
 #1.2 Data Transformation# not required
+=======
+summary(data)
+str(data)
+#1.2 Data Transformation
+>>>>>>> 2e31d331757f6942f648f7059f025cc6c36e0b84
 
 #1.3 Outlier detection#
+pairs(data) #for detecting outliers visually
 
 #1.3.1 Identification of univariate outliers using dot plots
 

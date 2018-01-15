@@ -149,6 +149,24 @@ ggpairs(corrected_dataset[-c(3,11,15)])
 plot(corrected_dataset$buyer_id,corrected_dataset$buyer_age)
 
 #1.5 Testing for normal distribution#
+#This function creates a matrix with QQ-Plots of a certain data frame (only numeric values allowed)
+normaldistplots <- function(d){
+  layout(matrix(1:8, ncol = 4, nrow = 2))
+  sapply(colnames(d), function(x){
+    xj = sort(d[[x]])
+    rj = rank(d[[x]])
+    js = (rj-0.5)/length(d[[x]])
+    qj = qnorm(js)
+    plot(qj,d[[x]],main = x, xlab = "Theoretical quantiles", ylab = "Obeserved quantiles")
+    qqline(d[[x]], lwd = 2, col = "red")
+  })
+}
+
+x <- data.frame(lapply(data_set_17[5], as.numeric), stringsAsFactors=FALSE)
+normaldistplots(data_set_17[c(4,6)])
+
+
+
 
 #2. Dimensionality Reduction#
 

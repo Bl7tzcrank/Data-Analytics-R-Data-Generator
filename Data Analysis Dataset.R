@@ -28,17 +28,16 @@ library(GGally)
 #1. Data Pre-processing#
 
 #1.1 Exploratory Data Analysis#
-
 str(data_set_17)
 summary(data_set_17)
 #ggpairs(data_set_17[-c(1,3,11,15)])
 
 #1.2 Data Transformation not required
 
-#1.3 Outlier detection#
-pairs(data) #for detecting outliers visually
+#1.3 Outlier detection
+pairs(data_set_17) #for detecting outliers visually
 
-#1.3.1 Identification of univariate outliers using dot plots
+#1.3.1 Identification of univariate outliers using box plots
 
 #Reduction of dataset because not all features can be checked with boxplots(Data Type)
 #Remaining features: buyer_age, buyer_annual_income, article_price, recipient_age
@@ -96,7 +95,7 @@ abline(h=14.86, col="red")
 
 allunivariateoutliersChiSquare = which(d>14.86)
 
-if(all(allunivariateoutliersCalc == outliers)){
+if(all(allunivariateoutliersChiSquare == outliers)){
   print("Outliers confirmed by Chi Squared.")
 }else{
   print("Chi squared outliers differ from previous outliers. Please check.")

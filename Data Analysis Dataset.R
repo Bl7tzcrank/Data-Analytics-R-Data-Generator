@@ -128,18 +128,30 @@ corrected_dataset[1214,4]=data_set_17[1629,4]
 corrected_dataset[1644,4]=floor(mean(corrected_dataset$buyer_age[-c(1644,1820)]))
 corrected_dataset[1820,4]=floor(mean(corrected_dataset$buyer_age[-c(1644,1820)]))
 
+#Correct article price by the "missing" value. REVIEW required! Only temporal solution
 data_set_17$article_price[which(data_set_17$article=="TV serial - DVD")]
 plot(data_set_17$article_price[which(data_set_17$article=="TV serial - DVD")])
 #44.99
 corrected_dataset[193,12]=44.99
 
+#Correct article price by the "missing" value. REVIEW required! Only temporal solution
 data_set_17$article_price[which(data_set_17$article=="Perfume")]
 plot(data_set_17$article_price[which(data_set_17$article=="Perfume")])
 #228.99
 corrected_dataset[1488,12]=228.99
 
+#Correct reciepient_age by using average age of all other customers.
+avgRecAge = mean(data_set_17$recipient_age[-c(1545,1586)])
+
+corrected_dataset[1545,13] = avgRecAge
+corrected_dataset[1586,13] = avgRecAge
+
 #No values for buyer_annual_income. As we cannot assume that those values are incorrect (annual incomes of 354000 and 494000 are possible)
 #we decided to exclude the data sets in order to facilitate further analysis.
+corrected_dataset = corrected_dataset[-c(1159,1178),]
+
+pairs(corrected_dataset)
+
 
 #1.5 Testing for normal distribution#
 

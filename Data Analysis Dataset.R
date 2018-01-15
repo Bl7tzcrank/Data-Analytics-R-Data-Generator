@@ -31,13 +31,9 @@ library(GGally)
 
 str(data_set_17)
 summary(data_set_17)
-pairs(data_set_17)
 #ggpairs(data_set_17[-c(1,3,11,15)])
 
 #1.2 Data Transformation not required
-
-summary(data)
-str(data)
 
 #1.3 Outlier detection#
 pairs(data) #for detecting outliers visually
@@ -120,8 +116,10 @@ corrected_dataset[36,4]=data_set_17[9,4]
 corrected_dataset[1214,4]=data_set_17[1629,4]
 
 #Correct buyer_age data by using rounded average values of age (from data without the extreme values)
-corrected_dataset[1644,4]=floor(mean(corrected_dataset$buyer_age[-c(1644,1820)]))
-corrected_dataset[1820,4]=floor(mean(corrected_dataset$buyer_age[-c(1644,1820)]))
+#corrected_dataset[1644,4]=floor(mean(corrected_dataset$buyer_age[-c(1644,1820)]))#this has to be 72 according to dependency between buyer_id and buyer_age
+corrected_dataset[1644,4]= 72
+#corrected_dataset[1820,4]=floor(mean(corrected_dataset$buyer_age[-c(1644,1820)])) #this has to be 25 or 26 according to dependency between buyer_id and buyer_age
+corrected_dataset[1644,4]= 25
 
 #Correct article price by the "missing" value. REVIEW required! Only temporal solution
 data_set_17$article_price[which(data_set_17$article=="TV serial - DVD")]

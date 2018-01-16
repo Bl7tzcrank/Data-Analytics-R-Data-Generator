@@ -202,6 +202,22 @@ mnormdistplots <- function(data){
   abline(a = 0, b = 1, col = "red", lwd = 2)
 }
 
+#hist for normal distribution test
+histo <-function(data){
+  layout(matrix(1:15, ncol = 5, nrow = 3))
+  sapply(colnames(data), function(x){
+    hist(as.numeric(data[[x]]), main = x, xlab = "",
+         col = "cyan", cex.main = 2)
+  })
+}
+
+#Shapiro-Wilk test for not-normal distribution
+hytest <-function(data){
+  sapply(colnames(data), function(x){
+    shapiro.test(as.numeric(data[[x]]))[1:2]
+  })
+}
+
 
 #2. Dimensionality Reduction#
 
@@ -212,7 +228,8 @@ mnormdistplots <- function(data){
 #Testing for normal distribution
 normaldistplots(getnumeric(data_set_17)) #visually by QQ-Plots
 mnormdistplots(getnumeric(data_set_17)) #visually by QQ-Plot
-
+histo(getnumeric(data_set_17)) #visually by histograms
+hytest(getnumeric(data_set_17)) #Shapiro-Wilk test
 
 
 

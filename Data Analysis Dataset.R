@@ -32,7 +32,22 @@ str(data_set_17)
 summary(data_set_17)
 #ggpairs(data_set_17[-c(1,3,11,15)])
 
-#1.2 Data Transformation not required
+#1.2 Data Transformation
+#turns non-numeric factors into numeric values
+getnumeric <-function(data){
+  for(i in 1:ncol(data)){
+    if(!is.null(data[,i])){
+      if(i == 1){
+        new_data = data.frame(lapply(data[i], as.numeric), stringsAsFactors=FALSE)
+      }else{
+        new_data = cbind(new_data,data.frame(lapply(data[i], as.numeric), stringsAsFactors=FALSE))
+      }
+    }
+  }
+  return(new_data)
+}
+
+
 
 #1.3 Outlier detection
 pairs(data_set_17) #for detecting outliers visually
@@ -150,22 +165,17 @@ plot(corrected_dataset$buyer_id,corrected_dataset$buyer_age)
 
 #1.5 Testing for normal distribution#
 #This function creates a matrix with QQ-Plots of a certain data frame (only numeric values allowed)
-normaldistplots <- function(d){
-  layout(matrix(1:8, ncol = 4, nrow = 2))
-  sapply(colnames(d), function(x){
-    xj = sort(d[[x]])
-    rj = rank(d[[x]])
-    js = (rj-0.5)/length(d[[x]])
+normaldistplots <- function(data){
+  layout(matrix(1:15, ncol = 5, nrow = 3))
+  sapply(colnames(data), function(x){
+    xj = sort(data[[x]])
+    rj = rank(data[[x]])
+    js = (rj-0.5)/length(data[[x]])
     qj = qnorm(js)
-    plot(qj,d[[x]],main = x, xlab = "Theoretical quantiles", ylab = "Obeserved quantiles")
-    qqline(d[[x]], lwd = 2, col = "red")
+    plot(qj,data[[x]],main = x, xlab = "Theoretical quantiles", ylab = "Obeserved quantiles")
+    qqline(data[[x]], lwd = 2, col = "red")
   })
 }
-
-x <- data.frame(lapply(data_set_17[5], as.numeric), stringsAsFactors=FALSE)
-normaldistplots(data_set_17[c(4,6)])
-
-
 
 
 #2. Dimensionality Reduction#
@@ -174,6 +184,8 @@ normaldistplots(data_set_17[c(4,6)])
 
 #########main##########
 
+#Testing for normal distribution
+normaldistplots(getnumeric(data_set_17)) #visually by QQ-Plots
 
 
 

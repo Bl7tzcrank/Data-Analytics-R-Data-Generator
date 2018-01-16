@@ -172,3 +172,10 @@ normaldistplots(data_set_17[c(4,6)])
 
 #3. Cluster Analysis#
 
+#########main##########
+
+
+
+
+
+

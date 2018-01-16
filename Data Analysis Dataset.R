@@ -177,6 +177,31 @@ normaldistplots <- function(data){
   })
 }
 
+#This function creates a Chi-Square plot: a QQ-Plot for the X2-distribution 
+#and can be used to test for multivariate normal distributions
+mnormdistplots <- function(data){
+  
+  x = getnumeric(data)
+  cm = colMeans(x)
+  S = cov(x)
+  d = apply(x, 1, function(x){
+    t(x - cm) %*% solve(S) %*% (x - cm)
+  })
+  sort.d = sort(d)
+  
+  qc = qchisq((seq_len(nrow(x)) - 1/2) / nrow(x), df = ncol(data))
+  plot(qc, sort.d, las = 1, pch = 19,
+       xlab = expression(paste(chi[7]^2, "-Quantile")),
+       ylab = "Ordered Distances",
+       xlim = range(qc) * c(0, 1.1),
+       ylim = range(sort.d) * c(0, 1.1))
+  
+  rank.deviations = rank(abs(qc - sort.d), ties = "random")
+  out = which(rank.deviations > nrow(x) - 3)
+  text(qc[out], sort.d[out], names(out), pos = 2, col = "blue")
+  abline(a = 0, b = 1, col = "red", lwd = 2)
+}
+
 
 #2. Dimensionality Reduction#
 
@@ -186,7 +211,7 @@ normaldistplots <- function(data){
 
 #Testing for normal distribution
 normaldistplots(getnumeric(data_set_17)) #visually by QQ-Plots
-
+mnormdistplots(getnumeric(data_set_17)) #visually by QQ-Plot
 
 
 

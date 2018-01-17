@@ -33,6 +33,8 @@ getnumeric <-function(data){
 
 #Calculate standardized values; returns entry number
 detectoutstand <- function(data){
+  
+  
   MeansCol <- apply(data,2, mean)
   CovMatrix = cov(data)
   SDCol = sqrt(diag(CovMatrix))
@@ -40,11 +42,9 @@ detectoutstand <- function(data){
   normalizedDataSet = apply(temp,1,function(x){
     x/SDCol
   })
-  normalizedDataSet = matrix(normalizedDataSet,nrow = nrow(data),ncol= ncol(data))
+  normalizedDataSet = t(matrix(normalizedDataSet,nrow = ncol(data),ncol = nrow(data)))
   #colnames(normalizedDataSet)<-colnames(data)
-  
-  allunivariateoutliersCalc = sort((which(normalizedDataSet>3.5)))
-  
+  allunivariateoutliersCalc = sort((which(abs(normalizedDataSet)>3.5)))
   return(allunivariateoutliersCalc)
 }
 
@@ -59,6 +59,7 @@ detectoutx <- function(data){
   #1.3.5 Visualize the distances in a chi-square distribution
   plot(qc, sort.d, las = 1, pch = 19, xlab = expression(paste(chi[4]^ 2,"-Quantile")), ylab = "Ordered Distances", xlim = range(qc) * c(0, 1.1), ylim = range(sort.d) * c(0, 1.1))
   abline(h=23.59, col="red")
+  return(d)
 }
 
 #1.4 Outlier removal#
@@ -170,11 +171,23 @@ summary(dataset)
 #ggpairs(dataset[-c(1,3,11,15)])
 
 #Initial NA replacement
-dataset <- knnImputation(data[, !names(dataset) %in% "medv"], meth = "median")  # perform knn imputation.
+datasetadj <- knnImputation(dataset[, !names(dataset) %in% "medv"], meth = "median")  # perform knn imputation.
+
+datasetadj <- outlierremoval(datasetadj)
+
+y <- detectoutstand(datasetadj)
+
+z <- detectoutx(datasetadj)
+
+z
+y
+
+summary(datasetadj)
+
 dataset = naremoval(dataset)
 
 #Outlier detection
-pairs(dataset) #for detecting outliers visually
+pairs(datasetadj) #for detecting outliers visually
 allBoxPlots = boxplot(log10(dataset)) #Visualization of outliers by using log10 boxplots
 detectoutstand(dataset) #outlier detection outputting standardized values
 detectoutx(dataset) #outlier detection outputting X2plot

@@ -200,8 +200,7 @@ normaldistplots(dataset) #visually by QQ-Plots
 mnormdistplots(dataset) #visually by QQ-Plot
 histo(dataset) #visually by histograms
 hytest(dataset) #Shapiro-Wilk test
-
 #Clustering
-#Showing buyer_annual_income - article_price by article_group
+#Showing number in bio - matches by gender
 ggplot(dataset, aes(dataset[,5], dataset[,9], color = dataset[,2])) + geom_point()
 

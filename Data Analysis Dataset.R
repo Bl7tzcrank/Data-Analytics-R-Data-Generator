@@ -12,7 +12,7 @@
 # article_group-> group, includes multiple subgroups
 # article_price -> price of the present
 # orderdate-> maybe more presents bought before christmas and easter
-# packaging -> was the present packed?
+# packaging -> was the present packaged?
 # shop -> online vs store
 # city -> where was it bought (store location or delvery "address")
 # recipient_age -> age of recipient

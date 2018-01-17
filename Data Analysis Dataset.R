@@ -20,7 +20,9 @@
 # recipient_relation -> it is important if you by a present for your grandma or your boy-/girlfriend
 
 #Read data set
-data_set_17 = read.csv("Datasets/data_17.csv")
+#data_set_17 = read.csv("Datasets/data_17.csv")
+#data_set_11 = read.csv("Datasets/data_11.csv")
+data_set_01 = get(load("Datasets/data_01.rdata", envir = parent.frame(), verbose = FALSE))
 
 #Import libraries
 install.packages("GGally")
@@ -226,12 +228,13 @@ hytest <-function(data){
 #########main##########
 
 #Testing for normal distribution
-normaldistplots(getnumeric(data_set_17)) #visually by QQ-Plots
-mnormdistplots(getnumeric(data_set_17)) #visually by QQ-Plot
-histo(getnumeric(data_set_17)) #visually by histograms
-hytest(getnumeric(data_set_17)) #Shapiro-Wilk test
+normaldistplots(getnumeric(data_set_01)) #visually by QQ-Plots
+mnormdistplots(getnumeric(data_set_01)) #visually by QQ-Plot
+histo(getnumeric(data_set_01)) #visually by histograms
+hytest(getnumeric(data_set_01)) #Shapiro-Wilk test
 
 #Clustering
 #Showing buyer_annual_income - article_price by article_group
 ggplot(corrected_dataset, aes(buyer_annual_income, article_price, color = article_group)) + geom_point()
+ggplot(corrected_dataset, aes(buyer_age, buyer_annual_income, color = article_group)) + geom_point()
 

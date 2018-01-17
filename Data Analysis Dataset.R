@@ -231,5 +231,7 @@ mnormdistplots(getnumeric(data_set_17)) #visually by QQ-Plot
 histo(getnumeric(data_set_17)) #visually by histograms
 hytest(getnumeric(data_set_17)) #Shapiro-Wilk test
 
-
+#Clustering
+#Showing buyer_annual_income - article_price by article_group
+ggplot(corrected_dataset, aes(buyer_annual_income, article_price, color = article_group)) + geom_point()
 

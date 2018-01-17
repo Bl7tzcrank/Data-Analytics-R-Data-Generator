@@ -4,6 +4,7 @@
 install.packages("GGally")
 install.packages("DMwR")
 library(GGally)
+library(ggplot2)
 library(DMwR)
 
 #########functions##########

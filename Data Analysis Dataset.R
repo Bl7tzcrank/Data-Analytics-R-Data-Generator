@@ -2,7 +2,9 @@
 
 #Import libraries
 install.packages("GGally")
+install.packages("DMwR")
 library(GGally)
+library(DMwR)
 
 #########functions##########
 
@@ -68,6 +70,19 @@ naremoval <- function(data){
   }
   return(data)
 }
+
+outlierremoval <-function(data){
+  o <- detectoutstand(data)
+  d <-as.matrix(dataset)
+  
+  for(i in 1:length(o)){
+    d[[o[i]]] = NA
+  }
+  d <- as.data.frame(d)
+  knnOutput <- knnImputation(d[, !names(d) %in% "medv"], meth = "median")  # perform knn imputation.
+  return(knnOutput)
+}
+
 
 #This function removes the given entry numbers and their corresponding rows from a given dataset
 
@@ -137,7 +152,7 @@ hytest <-function(data){
 #We created a dataset adopting the flirting-app “Tinder”, but for slightly older people, naming it “Finder”. Each user creates a profile and is able to change some settings and upload pictures. Our dataset includes some of those settings, the number of pictures uploaded as well as a “picky factor” used by the providers of the app. In general, swiping right means that the user wants to match with the shown user, swiping left is the opposite. We are only implementing a heterosexual version with two genders, meaning that women are matched to men only and other way round. For a more detailled description of the features please see the according subsection.
 #We generate data for the following features:
 #Age
-#Gender
+#Gender (0=female, 1=male)
 #Search Radius
 #Picky-Factor
 #Number of Characters in Bio per User
@@ -154,6 +169,7 @@ summary(dataset)
 #ggpairs(dataset[-c(1,3,11,15)])
 
 #Initial NA replacement
+dataset <- knnImputation(data[, !names(dataset) %in% "medv"], meth = "median")  # perform knn imputation.
 dataset = naremoval(dataset)
 
 #Outlier detection
@@ -163,15 +179,16 @@ detectoutstand(dataset) #outlier detection outputting standardized values
 detectoutx(dataset) #outlier detection outputting X2plot
 
 #Outlier removal
+knnOutput <- knnImputation(dataset[, !names(dataset) %in% "medv"], meth = "median")  # perform knn imputation.
+anyNA(knnOutput)
 
 #Testing for normal distribution
-normaldistplots(getnumeric(dataset)) #visually by QQ-Plots
-mnormdistplots(getnumeric(dataset)) #visually by QQ-Plot
-histo(getnumeric(dataset)) #visually by histograms
-hytest(getnumeric(dataset)) #Shapiro-Wilk test
+normaldistplots(dataset) #visually by QQ-Plots
+mnormdistplots(dataset) #visually by QQ-Plot
+histo(dataset) #visually by histograms
+hytest(dataset) #Shapiro-Wilk test
 
 #Clustering
 #Showing buyer_annual_income - article_price by article_group
-ggplot(corrected_dataset, aes(buyer_annual_income, article_price, color = article_group)) + geom_point()
-ggplot(corrected_dataset, aes(buyer_age, buyer_annual_income, color = article_group)) + geom_point()
+ggplot(dataset, aes(dataset[,5], dataset[,9], color = dataset[,2])) + geom_point()
 

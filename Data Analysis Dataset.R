@@ -168,7 +168,7 @@ removeValue <- function(data,l,v){
 #Agglomerativ on #characters_bio and matches by gender
 ggplot(datasetadj, aes(datasetadj[,5], datasetadj[,9], color = datasetadj[,2])) + geom_point()
 x <- cbind(datasetadj[,5],datasetadj[,9], datasetadj[,2])
-x <- removeZero(x,1)
+x <- removeValue(x,1,0)
 x <- as.data.frame(x)
 colnames(x) <- c("char", "matches", "gender")
 d <- dist(x, method="euclidean")
@@ -184,15 +184,15 @@ x <- cbind(datasetadj[,4],datasetadj[,3], datasetadj[,2])
 x <- as.data.frame(x)
 colnames(x) <- c("pickyness", "search_radius", "gender")
 d <- dist(x, method="euclidean")
-h <- hclust(d, method="single")
-c <- cutree(h, k = 4)
+h <- hclust(d, method="centroid")
+c <- cutree(h, k = 2)
 table(c,x[,3])
 ggplot(x, aes(pickyness, search_radius, color = c)) + 
   geom_point()
 
 #Kmeans on #characters_bio and matches by gender
 x <- cbind(datasetadj[,5],datasetadj[,9], datasetadj[,2])
-x <- removeZero(x,1)
+x <- removeValue(x,1,0)
 x <- as.data.frame(x)
 colnames(x) <- c("char", "matches", "gender")
 k <- kmeans(x[,1:2], 2, nstart = 200)
@@ -202,7 +202,7 @@ ggplot(x, aes(char, matches, color = k$cluster)) + geom_point()
 
 #Kmeans on search radius and pickyness by gender
 x <- cbind(datasetadj[,4],datasetadj[,3], datasetadj[,2])
-x <- removeZero(x,1)
+x <- removeValue(x,1,0)
 x <- as.data.frame(x)
 colnames(x) <- c("pickyness", "search_radius", "gender")
 k <- kmeans(x[,1:2], 2, nstart = 20)

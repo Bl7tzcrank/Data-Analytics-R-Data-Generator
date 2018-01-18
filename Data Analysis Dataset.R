@@ -198,7 +198,15 @@ x <- removeValue(x,1,0)
 x <- scale(x)
 x <- as.data.frame(x)
 colnames(x) <- c("char", "matches", "gender")
-k <- kmeans(x[,1:2], 2, nstart = 200)
+
+km <- lapply(1:6, function(k) replicate(10, kmeans(x[,1:2], centers = k)$tot.withinss))
+wss_k = sapply(1:6, function(k) mean(km[[k]]))
+
+plot(x = 1:6, y = log10(wss_k),
+     xlab = "k", ylab = expression("log(" * WSS[k] * ")"),
+     las = 1, pch = 19, type = "o")
+
+k <- kmeans(x[,1:2], 3)
 table(k$cluster, x$gender)
 k$cluster <- as.factor(k$cluster)
 ggplot(x, aes(char, matches, color = k$cluster)) + geom_point()
@@ -209,7 +217,15 @@ x <- removeValue(x,1,0)
 x <- scale(x)
 x <- as.data.frame(x)
 colnames(x) <- c("pickyness", "search_radius", "gender")
-k <- kmeans(x[,1:2], 2, nstart = 20)
+
+km <- lapply(1:6, function(k) replicate(10, kmeans(x[,1:2], centers = k)$tot.withinss))
+wss_k = sapply(1:6, function(k) mean(km[[k]]))
+
+plot(x = 1:6, y = log10(wss_k),
+     xlab = "k", ylab = expression("log(" * WSS[k] * ")"),
+     las = 1, pch = 19, type = "o")
+
+k <- kmeans(x[,1:2], 2)
 table(k$cluster, x$gender)
 k$cluster <- as.factor(k$cluster)
 ggplot(x, aes(pickyness, search_radius, color = k$cluster)) + geom_point()

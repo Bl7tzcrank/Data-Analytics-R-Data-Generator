@@ -6,11 +6,13 @@ install.packages("DMwR")
 install.packages("ClassDiscovery")
 install.packages("mvoutlier")
 install.packages("proxy")
+install.packages("dbscan")
 library(proxy)
 library(mvoutlier)
 library(GGally)
 library(ggplot2)
 library(DMwR)
+library(dbscan)
 
 #########functions##########
 
@@ -168,12 +170,11 @@ removeValue <- function(data,l,v){
 #Agglomerativ on #characters_bio and matches by gender
 ggplot(datasetadj, aes(datasetadj[,5], datasetadj[,7], color = datasetadj[,2])) + geom_point()
 x <- cbind(datasetadj[,5],datasetadj[,9], datasetadj[,2])
-x <- removeValue(x,1,0)
 x <- scale(x)
 x <- as.data.frame(x)
 colnames(x) <- c("char", "matches", "gender")
 d <- dist(x, method="euclidean")
-h <- hclust(d, method="centroid")
+h <- hclust(d, method="single")
 c <- cutree(h, k = 2)
 table(c,x[,3])
 ggplot(x, aes(char, matches, color = c)) + 
@@ -230,6 +231,12 @@ table(k$cluster, x$gender)
 k$cluster <- as.factor(k$cluster)
 ggplot(x, aes(pickyness, search_radius, color = k$cluster)) + geom_point()
 
+#DBScan
+x <- cbind(datasetadj[,4],datasetadj[,3], datasetadj[,2])
+x <- scale(x)
+x <- as.data.frame(x)
+colnames(x) <- c("pickyness", "search_radius", "gender")
+db <- dbscan(x, eps = .4, minPts = 4)
 
 #########main##########
 #Dataset description

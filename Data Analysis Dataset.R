@@ -61,7 +61,7 @@ detectoutx <- function(data){
   
   #1.3.5 Visualize the distances in a chi-square distribution
   plot(qc, sort.d, las = 1, pch = 19, xlab = expression(paste(chi[4]^ 2,"-Quantile")), ylab = "Ordered Distances", xlim = range(qc) * c(0, 1.1), ylim = range(sort.d) * c(0, 1.1))
-  lines(qc2,sort.d,col="green")
+  lines(qc,sort.d,col="green")
   abline(h=23.59, col="red")
   return(d)
 }
@@ -250,13 +250,13 @@ pairs(datasetadj)
 ggpairs(datasetadj)
 
 #Testing for normal distribution
-normaldistplots(dataset) #visually by QQ-Plots
-mnormdistplots(dataset) #visually by QQ-Plot
-histo(dataset) #visually by histograms
-hytest(dataset) #Shapiro-Wilk test
+normaldistplots(datasetadj) #visually by QQ-Plots
+mnormdistplots(datasetadj) #visually by QQ-Plot
+histo(datasetadj) #visually by histograms
+hytest(datasetadj) #Shapiro-Wilk test
 #Clustering
 #Showing number in bio - matches by gender
-ggplot(dataset, aes(dataset[,5], dataset[,9], color = dataset[,2])) + geom_point()
+ggplot(datasetadj, aes(datasetadj[,5], datasetadj[,9], color = datasetadj[,2])) + geom_point() + labs(x = "#characters_bio", y="matches", colour="gender")
 
 #PCA
 pca = princomp(covmat = cor(datasetadj))

@@ -61,7 +61,6 @@ detectoutx <- function(data){
   
   #1.3.5 Visualize the distances in a chi-square distribution
   plot(qc, sort.d, las = 1, pch = 19, xlab = expression(paste(chi[4]^ 2,"-Quantile")), ylab = "Ordered Distances", xlim = range(qc) * c(0, 1.1), ylim = range(sort.d) * c(0, 1.1))
-  lines(qc2,sort.d,col="green")
   abline(h=23.59, col="red")
   return(d)
 }

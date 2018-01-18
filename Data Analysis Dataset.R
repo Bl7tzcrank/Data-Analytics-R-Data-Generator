@@ -5,6 +5,8 @@ install.packages("GGally")
 install.packages("DMwR")
 install.packages("ClassDiscovery")
 install.packages("mvoutlier")
+install.packages("proxy")
+library(proxy)
 library(mvoutlier)
 library(GGally)
 library(ggplot2)
@@ -77,7 +79,7 @@ naremoval <- function(data){
 
 outlierremoval <-function(data){
   o <- detectoutstand(data)
-  d <-as.matrix(dataset)
+  d <-as.matrix(data)
   
   for(i in 1:length(o)){
     d[[o[i]]] = NA
@@ -180,10 +182,12 @@ datasetadj <- knnImputation(dataset[, !names(dataset) %in% "medv"], meth = "medi
 pairs(datasetadj) #for detecting outliers visually
 allBoxPlots = boxplot(log10(dataset)) #Visualization of outliers by using log10 boxplots
 detectoutstand(dataset) #outlier detection outputting standardized values
-detectoutx(dataset) #outlier detection outputting X2plot
+c = detectoutx(datasetadj) #outlier detection outputting X2plot
 
 #Outlier removal
 datasetadj <- outlierremoval(datasetadj)
+
+pairs(datasetadj)
 
 #Plot dataset for analysis
 ggpairs(datasetadj)

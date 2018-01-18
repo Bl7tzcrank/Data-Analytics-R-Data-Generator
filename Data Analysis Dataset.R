@@ -258,6 +258,10 @@ hytest(datasetadj) #Shapiro-Wilk test
 #Showing number in bio - matches by gender
 ggplot(datasetadj, aes(datasetadj[,5], datasetadj[,9], color = datasetadj[,2])) + geom_point() + labs(x = "#characters_bio", y="matches", colour="gender")
 
+#ggplot(datasetadj, aes(datasetadj[,4], datasetadj[,5])) + geom_point()
+#pairs(datasetadj)
+
+
 #PCA
 pca = princomp(covmat = cor(datasetadj))
 summary(pca)

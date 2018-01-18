@@ -111,7 +111,7 @@ normaldistplots <- function(data){
 #and can be used to test for multivariate normal distributions
 mnormdistplots <- function(data){
   
-  x = getnumeric(data)
+  x = data
   cm = colMeans(x)
   S = cov(x)
   d = apply(x, 1, function(x){
@@ -166,9 +166,10 @@ removeValue <- function(data,l,v){
 }
 
 #Agglomerativ on #characters_bio and matches by gender
-ggplot(datasetadj, aes(datasetadj[,5], datasetadj[,9], color = datasetadj[,2])) + geom_point()
+ggplot(datasetadj, aes(datasetadj[,5], datasetadj[,7], color = datasetadj[,2])) + geom_point()
 x <- cbind(datasetadj[,5],datasetadj[,9], datasetadj[,2])
 x <- removeValue(x,1,0)
+x <- scale(x)
 x <- as.data.frame(x)
 colnames(x) <- c("char", "matches", "gender")
 d <- dist(x, method="euclidean")
@@ -181,6 +182,7 @@ ggplot(x, aes(char, matches, color = c)) +
 #Agglomartaiv on search radius and pickyness by gender
 ggplot(dataset, aes(datasetadj[,4], datasetadj[,3], color = datasetadj[,2])) + geom_point()
 x <- cbind(datasetadj[,4],datasetadj[,3], datasetadj[,2])
+x <- scale(x)
 x <- as.data.frame(x)
 colnames(x) <- c("pickyness", "search_radius", "gender")
 d <- dist(x, method="euclidean")
@@ -193,6 +195,7 @@ ggplot(x, aes(pickyness, search_radius, color = c)) +
 #Kmeans on #characters_bio and matches by gender
 x <- cbind(datasetadj[,5],datasetadj[,9], datasetadj[,2])
 x <- removeValue(x,1,0)
+x <- scale(x)
 x <- as.data.frame(x)
 colnames(x) <- c("char", "matches", "gender")
 k <- kmeans(x[,1:2], 2, nstart = 200)
@@ -203,6 +206,7 @@ ggplot(x, aes(char, matches, color = k$cluster)) + geom_point()
 #Kmeans on search radius and pickyness by gender
 x <- cbind(datasetadj[,4],datasetadj[,3], datasetadj[,2])
 x <- removeValue(x,1,0)
+x <- scale(x)
 x <- as.data.frame(x)
 colnames(x) <- c("pickyness", "search_radius", "gender")
 k <- kmeans(x[,1:2], 2, nstart = 20)
@@ -258,8 +262,12 @@ hytest(datasetadj) #Shapiro-Wilk test
 #Showing number in bio - matches by gender
 ggplot(datasetadj, aes(datasetadj[,5], datasetadj[,9], color = datasetadj[,2])) + geom_point() + labs(x = "#characters_bio", y="matches", colour="gender")
 
+
 #ggplot(datasetadj, aes(datasetadj[,4], datasetadj[,5])) + geom_point()
 #pairs(datasetadj)
+
+pairs(datasetadj, col=ifelse(datasetadj$gender==0, "red", "blue"))
+
 
 
 #PCA

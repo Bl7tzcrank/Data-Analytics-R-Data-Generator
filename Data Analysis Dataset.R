@@ -3,6 +3,9 @@
 #Import libraries
 install.packages("GGally")
 install.packages("DMwR")
+install.packages("ClassDiscovery")
+install.packages("mvoutlier")
+library(mvoutlier)
 library(GGally)
 library(ggplot2)
 library(DMwR)
@@ -33,8 +36,6 @@ getnumeric <-function(data){
 
 #Calculate standardized values; returns entry number
 detectoutstand <- function(data){
-  
-  
   MeansCol <- apply(data,2, mean)
   CovMatrix = cov(data)
   SDCol = sqrt(diag(CovMatrix))
@@ -58,6 +59,7 @@ detectoutx <- function(data){
   
   #1.3.5 Visualize the distances in a chi-square distribution
   plot(qc, sort.d, las = 1, pch = 19, xlab = expression(paste(chi[4]^ 2,"-Quantile")), ylab = "Ordered Distances", xlim = range(qc) * c(0, 1.1), ylim = range(sort.d) * c(0, 1.1))
+  lines(qc2,sort.d,col="green")
   abline(h=23.59, col="red")
   return(d)
 }
@@ -82,7 +84,8 @@ outlierremoval <-function(data){
   }
   d <- as.data.frame(d)
   knnOutput <- knnImputation(d[, !names(d) %in% "medv"], meth = "median")  # perform knn imputation.
-  return(knnOutput)
+  z <- as.vector(which(detectoutx(knnOutput)>23.59))
+  return(knnOutput[-z,])
 }
 
 
@@ -173,19 +176,6 @@ summary(dataset)
 #Initial NA replacement
 datasetadj <- knnImputation(dataset[, !names(dataset) %in% "medv"], meth = "median")  # perform knn imputation.
 
-datasetadj <- outlierremoval(datasetadj)
-
-y <- detectoutstand(datasetadj)
-
-z <- detectoutx(datasetadj)
-
-z
-y
-
-summary(datasetadj)
-
-dataset = naremoval(dataset)
-
 #Outlier detection
 pairs(datasetadj) #for detecting outliers visually
 allBoxPlots = boxplot(log10(dataset)) #Visualization of outliers by using log10 boxplots
@@ -193,8 +183,10 @@ detectoutstand(dataset) #outlier detection outputting standardized values
 detectoutx(dataset) #outlier detection outputting X2plot
 
 #Outlier removal
-knnOutput <- knnImputation(dataset[, !names(dataset) %in% "medv"], meth = "median")  # perform knn imputation.
-anyNA(knnOutput)
+datasetadj <- outlierremoval(datasetadj)
+
+#Plot dataset for analysis
+ggpairs(datasetadj)
 
 #Testing for normal distribution
 normaldistplots(dataset) #visually by QQ-Plots
@@ -205,3 +197,14 @@ hytest(dataset) #Shapiro-Wilk test
 #Showing number in bio - matches by gender
 ggplot(dataset, aes(dataset[,5], dataset[,9], color = dataset[,2])) + geom_point()
 
+#PCA
+pca = princomp(covmat = cor(datasetadj))
+summary(pca)
+lines(pca$loadings) #indicates 5 PCAs
+
+standDS = apply(datasetadj, 2, function(x) (x - min(x)) / (max(x) - min(x)))
+
+standDSPCA = prcomp(standDS)
+ScalePCA = prcomp(datasetadj, scale. = TRUE) #why different values?
+
+biplot(ScalePCA)

@@ -151,6 +151,64 @@ hytest <-function(data){
 #2. Dimensionality Reduction#
 
 #3. Cluster Analysis#
+#function to remove observations with zeros in a certain row
+removeZero <- function(data,l){
+  k = 1
+  while(k <= nrow(data)){
+    if(data[k,l] == 0){
+      data = data[-k,]
+    }else{
+      k = k+1
+    }
+  }
+  return(data)
+}
+
+#Agglomerativ on #characters_bio and matches by gender
+ggplot(datasetadj, aes(datasetadj[,5], datasetadj[,9], color = datasetadj[,2])) + geom_point()
+x <- cbind(datasetadj[,5],datasetadj[,9], datasetadj[,2])
+x <- removeZero(x,1)
+x <- as.data.frame(x)
+colnames(x) <- c("char", "matches", "gender")
+d <- dist(x, method="euclidean")
+h <- hclust(d, method="centroid")
+c <- cutree(h, k = 2)
+table(c,x[,3])
+ggplot(x, aes(char, matches, color = c)) + 
+  geom_point()
+
+#Agglomartaiv on search radius and pickyness by gender
+ggplot(dataset, aes(datasetadj[,4], datasetadj[,3], color = datasetadj[,2])) + geom_point()
+x <- cbind(datasetadj[,4],datasetadj[,3], datasetadj[,2])
+x <- as.data.frame(x)
+colnames(x) <- c("pickyness", "search_radius", "gender")
+d <- dist(x, method="euclidean")
+h <- hclust(d, method="single")
+c <- cutree(h, k = 4)
+table(c,x[,3])
+ggplot(x, aes(pickyness, search_radius, color = c)) + 
+  geom_point()
+
+#Kmeans on #characters_bio and matches by gender
+x <- cbind(datasetadj[,5],datasetadj[,9], datasetadj[,2])
+x <- removeZero(x,1)
+x <- as.data.frame(x)
+colnames(x) <- c("char", "matches", "gender")
+k <- kmeans(x[,1:2], 2, nstart = 200)
+table(k$cluster, x$gender)
+k$cluster <- as.factor(k$cluster)
+ggplot(x, aes(char, matches, color = k$cluster)) + geom_point()
+
+#Kmeans on search radius and pickyness by gender
+x <- cbind(datasetadj[,4],datasetadj[,3], datasetadj[,2])
+x <- removeZero(x,1)
+x <- as.data.frame(x)
+colnames(x) <- c("pickyness", "search_radius", "gender")
+k <- kmeans(x[,1:2], 2, nstart = 20)
+table(k$cluster, x$gender)
+k$cluster <- as.factor(k$cluster)
+ggplot(x, aes(pickyness, search_radius, color = k$cluster)) + geom_point()
+
 
 #########main##########
 #Dataset description

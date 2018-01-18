@@ -90,7 +90,6 @@ outlierremoval <-function(data){
   return(knnOutput[-z,])
 }
 
-
 #This function removes the given entry numbers and their corresponding rows from a given dataset
 
 
@@ -153,11 +152,11 @@ hytest <-function(data){
 #2. Dimensionality Reduction#
 
 #3. Cluster Analysis#
-#function to remove observations with zeros in a certain row
-removeZero <- function(data,l){
+#function to remove observations with a certain value in a certain row
+removeValue <- function(data,l,v){
   k = 1
   while(k <= nrow(data)){
-    if(data[k,l] == 0){
+    if(data[k,l] == v){
       data = data[-k,]
     }else{
       k = k+1
@@ -239,7 +238,7 @@ datasetadj <- knnImputation(dataset[, !names(dataset) %in% "medv"], meth = "medi
 #Outlier detection
 pairs(datasetadj) #for detecting outliers visually
 allBoxPlots = boxplot(log10(dataset)) #Visualization of outliers by using log10 boxplots
-detectoutstand(dataset) #outlier detection outputting standardized values
+detectoutstand(datasetadj) #outlier detection outputting standardized values
 c = detectoutx(datasetadj) #outlier detection outputting X2plot
 
 #Outlier removal

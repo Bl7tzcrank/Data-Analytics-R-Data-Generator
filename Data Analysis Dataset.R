@@ -167,50 +167,47 @@ removeValue <- function(data,l,v){
   return(data)
 }
 
-#Agglomerativ on #characters_bio and matches by gender
-ggplot(datasetadj, aes(datasetadj[,5], datasetadj[,7], color = datasetadj[,2])) + geom_point()
+#Agglomerativ on age and pickyness by gender [Better than k-Means!]
+ggplot(datasetadj, aes(datasetadj[,1], datasetadj[,4], color = datasetadj[,2])) + geom_point()
+x <- cbind(datasetadj[,1],datasetadj[,4], datasetadj[,2])
+x <- scale(x)
+x <- as.data.frame(x)
+colnames(x) <- c("age", "pickyness", "gender")
+d <- dist(x, method="euclidean")
+h <- hclust(d, method="single")
+plot(h) #2 clusters seems to be appropriate
+c <- cutree(h, k = 2)
+table(c,x[,3])
+ggplot(x, aes(age, pickyness, color = c)) + 
+  geom_point()
+
+#Agglomerativ on #characters_bio and matches by gender [Better than k-Means!]
+ggplot(datasetadj, aes(datasetadj[,5], datasetadj[,9], color = datasetadj[,2])) + geom_point()
 x <- cbind(datasetadj[,5],datasetadj[,9], datasetadj[,2])
 x <- scale(x)
 x <- as.data.frame(x)
 colnames(x) <- c("char", "matches", "gender")
 d <- dist(x, method="euclidean")
 h <- hclust(d, method="single")
+plot(h) # 2 clusters seems to be appropriate
 c <- cutree(h, k = 2)
 table(c,x[,3])
 ggplot(x, aes(char, matches, color = c)) + 
   geom_point()
 
-#Agglomartaiv on search radius and pickyness by gender
-ggplot(dataset, aes(datasetadj[,4], datasetadj[,3], color = datasetadj[,2])) + geom_point()
+#Agglomartaiv on search radius and pickyness by gender [Better than k-Means!]
+ggplot(datasetadj, aes(datasetadj[,4], datasetadj[,3], color = datasetadj[,2])) + geom_point()
 x <- cbind(datasetadj[,4],datasetadj[,3], datasetadj[,2])
 x <- scale(x)
 x <- as.data.frame(x)
 colnames(x) <- c("pickyness", "search_radius", "gender")
 d <- dist(x, method="euclidean")
-h <- hclust(d, method="centroid")
+h <- hclust(d, method="single")
+plot(h) # 2 clusters seems to be appropriate
 c <- cutree(h, k = 2)
 table(c,x[,3])
 ggplot(x, aes(pickyness, search_radius, color = c)) + 
   geom_point()
-
-#Kmeans on #characters_bio and matches by gender
-x <- cbind(datasetadj[,5],datasetadj[,9], datasetadj[,2])
-x <- removeValue(x,1,0)
-x <- scale(x)
-x <- as.data.frame(x)
-colnames(x) <- c("char", "matches", "gender")
-
-km <- lapply(1:6, function(k) replicate(10, kmeans(x[,1:2], centers = k)$tot.withinss))
-wss_k = sapply(1:6, function(k) mean(km[[k]]))
-
-plot(x = 1:6, y = log10(wss_k),
-     xlab = "k", ylab = expression("log(" * WSS[k] * ")"),
-     las = 1, pch = 19, type = "o")
-
-k <- kmeans(x[,1:2], 3)
-table(k$cluster, x$gender)
-k$cluster <- as.factor(k$cluster)
-ggplot(x, aes(char, matches, color = k$cluster)) + geom_point()
 
 #Kmeans on search radius and pickyness by gender
 x <- cbind(datasetadj[,4],datasetadj[,3], datasetadj[,2])
@@ -231,6 +228,25 @@ table(k$cluster, x$gender)
 k$cluster <- as.factor(k$cluster)
 ggplot(x, aes(pickyness, search_radius, color = k$cluster)) + geom_point()
 
+#Kmeans on age and pickyness by gender
+x <- cbind(datasetadj[,1],datasetadj[,4], datasetadj[,2])
+x <- removeValue(x,1,0)
+x <- scale(x)
+x <- as.data.frame(x)
+colnames(x) <- c("age", "pickyness", "gender")
+
+km <- lapply(1:6, function(k) replicate(10, kmeans(x[,1:2], centers = k)$tot.withinss))
+wss_k = sapply(1:6, function(k) mean(km[[k]]))
+
+plot(x = 1:6, y = log10(wss_k),
+     xlab = "k", ylab = expression("log(" * WSS[k] * ")"),
+     las = 1, pch = 19, type = "o")
+
+k <- kmeans(x[,1:2], 3)
+table(k$cluster, x$gender)
+k$cluster <- as.factor(k$cluster)
+ggplot(x, aes(age, pickyness, color = k$cluster)) + geom_point()
+
 #DBScan
 x <- cbind(datasetadj[,4],datasetadj[,3], datasetadj[,2])
 x <- scale(x)
@@ -238,6 +254,8 @@ x <- as.data.frame(x)
 colnames(x) <- c("pickyness", "search_radius", "gender")
 db <- dbscan(x, eps = .4, minPts = 4)
 
+ggplot(datasetadj, aes(datasetadj[,4], datasetadj[,9], color = datasetadj[,2])) + geom_point() + labs(x = colnames(datasetadj)[4], y = colnames(datasetadj)[9])
+pairs(datasetadj)
 #########main##########
 #Dataset description
 #We created a dataset adopting the flirting-app “Tinder”, but for slightly older people, naming it “Finder”. Each user creates a profile and is able to change some settings and upload pictures. Our dataset includes some of those settings, the number of pictures uploaded as well as a “picky factor” used by the providers of the app. In general, swiping right means that the user wants to match with the shown user, swiping left is the opposite. We are only implementing a heterosexual version with two genders, meaning that women are matched to men only and other way round. For a more detailled description of the features please see the according subsection.

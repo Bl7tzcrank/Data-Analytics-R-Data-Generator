@@ -145,8 +145,9 @@ histo <-function(data){
 
 #Shapiro-Wilk test for not-normal distribution
 hytest <-function(data){
-  sapply(colnames(data), function(x){
-    shapiro.test(as.numeric(data[[x]]))[1:2]
+  d <- scale(data)
+  sapply(colnames(d), function(x){
+    shapiro.test(as.numeric(d[,x]))[1:2]
   })
 }
 

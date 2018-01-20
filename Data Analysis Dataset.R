@@ -168,7 +168,7 @@ removeValue <- function(data,l,v){
   return(data)
 }
 
-#Agglomerativ on age and pickyness by gender [Better than k-Means!]
+#Agglomerative on age and pickyness by gender [Better than k-Means!]
 ggplot(datasetadj, aes(datasetadj[,1], datasetadj[,4], color = datasetadj[,2])) + geom_point()
 x <- cbind(datasetadj[,1],datasetadj[,4], datasetadj[,2])
 x <- scale(x)
@@ -177,12 +177,12 @@ colnames(x) <- c("age", "pickyness", "gender")
 d <- dist(x, method="euclidean")
 h <- hclust(d, method="single")
 plot(h) #2 clusters seems to be appropriate
-c <- cutree(h, k = 2)
-table(c,x[,3])
-ggplot(x, aes(age, pickyness, color = c)) + 
+cluster <- cutree(h, k = 2)
+table(cluster,x[,3])
+ggplot(x, aes(age, pickyness, color = cluster)) + 
   geom_point()
 
-#Agglomerativ on #characters_bio and matches by gender [Better than k-Means!]
+#Agglomerative on #characters_bio and matches by gender [Better than k-Means!]
 ggplot(datasetadj, aes(datasetadj[,5], datasetadj[,9], color = datasetadj[,2])) + geom_point()
 x <- cbind(datasetadj[,5],datasetadj[,9], datasetadj[,2])
 x <- scale(x)
@@ -196,7 +196,7 @@ table(c,x[,3])
 ggplot(x, aes(char, matches, color = c)) + 
   geom_point()
 
-#Agglomartaiv on search radius and pickyness by gender [Better than k-Means!]
+#Agglomerative on search radius and pickyness by gender [Better than k-Means!]
 ggplot(datasetadj, aes(datasetadj[,4], datasetadj[,3], color = datasetadj[,2])) + geom_point()
 x <- cbind(datasetadj[,4],datasetadj[,3], datasetadj[,2])
 x <- scale(x)
@@ -210,53 +210,50 @@ table(c,x[,3])
 ggplot(x, aes(pickyness, search_radius, color = c)) + 
   geom_point()
 
-#Kmeans on search radius and pickyness by gender
-x <- cbind(datasetadj[,4],datasetadj[,3], datasetadj[,2])
-x <- removeValue(x,1,0)
+
+#Kmeans on pickyness and matches by gender
+x <- cbind(datasetadj[,4],datasetadj[,9], datasetadj[,2])
+#x <- removeValue(x,1,0)
 x <- scale(x)
 x <- as.data.frame(x)
-colnames(x) <- c("pickyness", "search_radius", "gender")
+colnames(x) <- c("pickyness", "matches", "gender")
 
-km <- lapply(1:6, function(k) replicate(10, kmeans(x[,1:2], centers = k)$tot.withinss))
+km <- lapply(1:6, function(k) replicate(10, kmeans(x, centers = k)$tot.withinss))
 wss_k = sapply(1:6, function(k) mean(km[[k]]))
 
 plot(x = 1:6, y = log10(wss_k),
      xlab = "k", ylab = expression("log(" * WSS[k] * ")"),
      las = 1, pch = 19, type = "o")
 
-k <- kmeans(x[,1:2], 2)
+k <- kmeans(x, 2)
 table(k$cluster, x$gender)
 k$cluster <- as.factor(k$cluster)
-ggplot(x, aes(pickyness, search_radius, color = k$cluster)) + geom_point()
-
-#Kmeans on age and pickyness by gender
-x <- cbind(datasetadj[,1],datasetadj[,4], datasetadj[,2])
-x <- removeValue(x,1,0)
-x <- scale(x)
-x <- as.data.frame(x)
-colnames(x) <- c("age", "pickyness", "gender")
-
-km <- lapply(1:6, function(k) replicate(10, kmeans(x[,1:2], centers = k)$tot.withinss))
-wss_k = sapply(1:6, function(k) mean(km[[k]]))
-
-plot(x = 1:6, y = log10(wss_k),
-     xlab = "k", ylab = expression("log(" * WSS[k] * ")"),
-     las = 1, pch = 19, type = "o")
-
-k <- kmeans(x[,1:2], 3)
-table(k$cluster, x$gender)
-k$cluster <- as.factor(k$cluster)
-ggplot(x, aes(age, pickyness, color = k$cluster)) + geom_point()
+ggplot(x, aes(pickyness, matches, color = k$cluster)) + geom_point()
 
 #DBScan
-x <- cbind(datasetadj[,4],datasetadj[,3], datasetadj[,2])
+x <- cbind(datasetadj[,4],datasetadj[,3])#, datasetadj[,2])
 x <- scale(x)
 x <- as.data.frame(x)
-colnames(x) <- c("pickyness", "search_radius", "gender")
-db <- dbscan(x, eps = .4, minPts = 4)
+colnames(x) <- c("pickyness", "search_radius")#, "gender")
+db <- dbscan(x, eps = .5, minPts = 4)
+plot(db$cluster)
 
-ggplot(datasetadj, aes(datasetadj[,4], datasetadj[,9], color = datasetadj[,2])) + geom_point() + labs(x = colnames(datasetadj)[4], y = colnames(datasetadj)[9])
+#plot tests
+xaxis = 4
+yaxis = 9
+
+ggplot(datasetadj, aes(datasetadj[,xaxis], datasetadj[,yaxis], color = datasetadj[,2])) + geom_point() + labs(x = colnames(datasetadj)[xaxis], y = colnames(datasetadj)[yaxis])
 pairs(datasetadj)
+
+mean(datasetadj$`#characters_bio`[which(datasetadj$gender ==0)])
+which(is.na(datasettest$gender))
+
+nrow(datasettest)
+datasettest = dataset[-c(6,229,348),]
+
+
+
+
 #########main##########
 #Dataset description
 #We created a dataset adopting the flirting-app “Tinder”, but for slightly older people, naming it “Finder”. Each user creates a profile and is able to change some settings and upload pictures. Our dataset includes some of those settings, the number of pictures uploaded as well as a “picky factor” used by the providers of the app. In general, swiping right means that the user wants to match with the shown user, swiping left is the opposite. We are only implementing a heterosexual version with two genders, meaning that women are matched to men only and other way round. For a more detailled description of the features please see the according subsection.

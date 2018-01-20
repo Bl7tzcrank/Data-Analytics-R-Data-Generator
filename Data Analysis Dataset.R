@@ -20,19 +20,6 @@ library(dbscan)
 #1.1 Exploratory Data Analysis#
 
 #1.2 Data Transformation
-#turns non-numeric factors into numeric values, only if factor levels available
-getnumeric <-function(data){
-  for(i in 1:ncol(data)){
-    if(!is.null(data[,i])){
-      if(i == 1){
-        new_data = data.frame(lapply(data[i], as.numeric), stringsAsFactors=FALSE)
-      }else{
-        new_data = cbind(new_data,data.frame(lapply(data[i], as.numeric), stringsAsFactors=FALSE))
-      }
-    }
-  }
-  return(new_data)
-}
 
 #1.3 Outlier detection
 
@@ -58,13 +45,13 @@ detectoutx <- function(data){
   MeansCol <- apply(data,2, mean)
   CovMatrix = cov(data)
   d = apply(data, 1, function(x) t(x - MeansCol) %*% solve(CovMatrix) %*% (x-MeansCol))
-  qc = qchisq((seq_len(nrow(data)) - 1/2) / nrow(data), df = 9)
-  sort.d = sort(d)
+  #qc = qchisq((seq_len(nrow(data)) - 1/2) / nrow(data), df = 9)
+  #sort.d = sort(d)
   
   #1.3.5 Visualize the distances in a chi-square distribution
-  plot(qc, sort.d, las = 1, pch = 19, xlab = expression(paste(chi[4]^ 2,"-Quantile")), ylab = "Ordered Distances", xlim = range(qc) * c(0, 1.1), ylim = range(sort.d) * c(0, 1.1))
-  lines(qc,sort.d,col="green")
-  abline(h=23.59, col="red")
+  #plot(qc, sort.d, las = 1, pch = 19, xlab = expression(paste(chi[4]^ 2,"-Quantile")), ylab = "Ordered Distances", xlim = range(qc) * c(0, 1.1), ylim = range(sort.d) * c(0, 1.1))
+  #lines(qc,sort.d,col="green")
+  #abline(h=23.59, col="red")
   return(d)
 }
 
@@ -79,6 +66,7 @@ naremoval <- function(data){
   return(data)
 }
 
+#This functions removes outliers
 outlierremoval <-function(data){
   o <- detectoutstand(data)
   d <-as.matrix(data)
@@ -91,21 +79,6 @@ outlierremoval <-function(data){
   z <- as.vector(which(detectoutx(knnOutput)>23.59))
   return(knnOutput[-z,])
 }
-
-#outlierremoval <-function(data){
-  #o <- detectoutstand(data)
-  #d <-as.matrix(data)
-  
-  #for(i in 1:length(o)){
-   # d[[o[i]]] = NA
-  #}
-  #d <-as.data.frame(d)
-  
- # return(d[complete.cases(d), ])
-#}
-
-#This function removes the given entry numbers and their corresponding rows from a given dataset
-
 
 #1.5 Testing for normal distribution#
 #This function creates a matrix with QQ-Plots of a certain data frame (only numeric values allowed)

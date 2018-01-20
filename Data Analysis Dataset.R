@@ -79,7 +79,7 @@ naremoval <- function(data){
   return(data)
 }
 
-outlierremoval <-function(data){
+outlierremovalOLD <-function(data){
   o <- detectoutstand(data)
   d <-as.matrix(data)
   
@@ -90,6 +90,17 @@ outlierremoval <-function(data){
   knnOutput <- knnImputation(d[, !names(d) %in% "medv"], meth = "median")  # perform knn imputation.
   z <- as.vector(which(detectoutx(knnOutput)>23.59))
   return(knnOutput[-z,])
+}
+
+outlierremoval <-function(data){
+  o <- detectoutstand(data)
+  d <-as.matrix(data)
+  
+  for(i in 1:length(o)){
+    d[[o[i]]] = NA
+  }
+  z <- as.vector(which(any(is.na(d))))
+  return(d[-z,])
 }
 
 #This function removes the given entry numbers and their corresponding rows from a given dataset

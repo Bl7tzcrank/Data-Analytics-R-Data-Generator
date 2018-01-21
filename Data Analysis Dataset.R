@@ -7,6 +7,8 @@ install.packages("ClassDiscovery")
 install.packages("mvoutlier")
 install.packages("proxy")
 install.packages("dbscan")
+install.packages("MVN")
+library(MVN)
 library(proxy)
 library(mvoutlier)
 library(GGally)
@@ -66,7 +68,9 @@ naremoval <- function(data){
   return(data)
 }
 
-#This functions removes outliers
+#This functions identifies univariate outliers based on standardized values (>3.5) and multivariate outliers (based on Chi-square test)
+#Univariate outliers are replaced by applying knn imputation 
+#Observations with multivariate outliers are excluded from the data set
 outlierremoval <-function(data){
   o <- detectoutstand(data)
   d <-as.matrix(data)
@@ -287,6 +291,12 @@ ggpairs(datasetadj)
 normaldistplots(datasetadj) #visually by QQ-Plots
 mnormdistplots(datasetadj) #visually by QQ-Plot
 histo(datasetadj) #visually by histograms
+checkNormSW = uniNorm(datasetadj, type="SW" , desc=TRUE) # Shapiro-Wilk's Normality Test
+checkNormCVM = uniNorm(datasetadj, type="CVM" , desc=TRUE) # Cramer-von Mises's Normality test
+checkNormLillie = uniNorm(datasetadj, type="Lillie" , desc=TRUE) # Lilliefors (Kolmogrov-Smirnov) Normality Test
+checkNormSF = uniNorm(datasetadj, type="SF" , desc=TRUE) # Shapiro-Francia's Normality Test
+checkNormAD = uniNorm(datasetadj, type="AD" , desc=TRUE) # Anderson-Darling's Normality Test
+
 hytest(datasetadj) #Shapiro-Wilk test
 #Clustering
 #Showing number in bio - matches by gender
@@ -301,13 +311,5 @@ pairs(datasetadj, col=ifelse(datasetadj$gender==0, "red", "blue"))
 
 
 #PCA
-pca = princomp(covmat = cor(datasetadj))
-summary(pca)
-lines(pca$loadings) #indicates 5 PCAs
 
-standDS = apply(datasetadj, 2, function(x) (x - min(x)) / (max(x) - min(x)))
 
-standDSPCA = prcomp(standDS)
-ScalePCA = prcomp(datasetadj, scale. = TRUE) #why different values?
-
-biplot(ScalePCA)

@@ -136,6 +136,12 @@ hytest <-function(data){
   })
 }
 
+hytestexp <-function(data){
+  d <- scale(data)
+  sapply(colnames(d), function(x){
+    ks.test(x = d, y = "pexp", rate = 1/mean(d))
+  })
+}
 
 #2. Dimensionality Reduction#
 

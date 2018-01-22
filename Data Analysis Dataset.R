@@ -8,6 +8,7 @@ install.packages("mvoutlier")
 install.packages("proxy")
 install.packages("dbscan")
 install.packages("MVN")
+
 library(MVN)
 library(proxy)
 library(mvoutlier)
@@ -15,6 +16,9 @@ library(GGally)
 library(ggplot2)
 library(DMwR)
 library(dbscan)
+
+
+
 
 #########functions##########
 

@@ -144,10 +144,16 @@ hytest <-function(data){
   })
 }
 
+hytestexp <-function(data){
+  d <- scale(data)
+  sapply(colnames(d), function(x){
+    ks.test(x = d, y = "pexp", rate = 1/mean(d))
+  })
+}
 
 #2. Dimensionality Reduction#
 
-#3. Cluster Analysis#
+#3. Cluster Analysis# (executed during main part)
 #function to remove observations with a certain value in a certain row
 removeValue <- function(data,l,v){
   k = 1
@@ -161,91 +167,12 @@ removeValue <- function(data,l,v){
   return(data)
 }
 
-#Agglomerative on age and pickyness by gender [Better than k-Means!]
-ggplot(datasetadj, aes(datasetadj[,1], datasetadj[,4], color = datasetadj[,2])) + geom_point()
-x <- cbind(datasetadj[,1],datasetadj[,4], datasetadj[,2])
-x <- scale(x)
-x <- as.data.frame(x)
-colnames(x) <- c("age", "pickyness", "gender")
-d <- dist(x, method="euclidean")
-h <- hclust(d, method="single")
-plot(h) #2 clusters seems to be appropriate
-cluster <- cutree(h, k = 2)
-table(cluster,x[,3])
-ggplot(x, aes(age, pickyness, color = cluster)) + 
-  geom_point()
-
-#Agglomerative on #characters_bio and matches by gender [Better than k-Means!]
-ggplot(datasetadj, aes(datasetadj[,5], datasetadj[,9], color = datasetadj[,2])) + geom_point()
-x <- cbind(datasetadj[,5],datasetadj[,9], datasetadj[,2])
-x <- scale(x)
-x <- as.data.frame(x)
-colnames(x) <- c("char", "matches", "gender")
-d <- dist(x, method="euclidean")
-h <- hclust(d, method="single")
-plot(h) # 2 clusters seems to be appropriate
-c <- cutree(h, k = 2)
-table(c,x[,3])
-ggplot(x, aes(char, matches, color = c)) + 
-  geom_point()
-
-#Agglomerative on search radius and pickyness by gender [Better than k-Means!]
-ggplot(datasetadj, aes(datasetadj[,4], datasetadj[,3], color = datasetadj[,2])) + geom_point()
-x <- cbind(datasetadj[,4],datasetadj[,3], datasetadj[,2])
-x <- scale(x)
-x <- as.data.frame(x)
-colnames(x) <- c("pickyness", "search_radius", "gender")
-d <- dist(x, method="euclidean")
-h <- hclust(d, method="single")
-plot(h) # 2 clusters seems to be appropriate
-c <- cutree(h, k = 2)
-table(c,x[,3])
-ggplot(x, aes(pickyness, search_radius, color = c)) + 
-  geom_point()
-
-
-#Kmeans on pickyness and matches by gender
-x <- cbind(datasetadj[,4],datasetadj[,9], datasetadj[,2])
-#x <- removeValue(x,1,0)
-x <- scale(x)
-x <- as.data.frame(x)
-colnames(x) <- c("pickyness", "matches", "gender")
-
-km <- lapply(1:6, function(k) replicate(10, kmeans(x, centers = k)$tot.withinss))
-wss_k = sapply(1:6, function(k) mean(km[[k]]))
-
-plot(x = 1:6, y = log10(wss_k),
-     xlab = "k", ylab = expression("log(" * WSS[k] * ")"),
-     las = 1, pch = 19, type = "o")
-
-k <- kmeans(x, 2)
-table(k$cluster, x$gender)
-k$cluster <- as.factor(k$cluster)
-ggplot(x, aes(pickyness, matches, color = k$cluster)) + geom_point()
-
-#DBScan
-x <- cbind(datasetadj[,4],datasetadj[,3])#, datasetadj[,2])
-x <- scale(x)
-x <- as.data.frame(x)
-colnames(x) <- c("pickyness", "search_radius")#, "gender")
-db <- dbscan(x, eps = .5, minPts = 4)
-plot(db$cluster)
-
 #plot tests
-xaxis = 4
+xaxis = 6
 yaxis = 9
 
 ggplot(datasetadj, aes(datasetadj[,xaxis], datasetadj[,yaxis], color = datasetadj[,2])) + geom_point() + labs(x = colnames(datasetadj)[xaxis], y = colnames(datasetadj)[yaxis])
 pairs(datasetadj)
-
-mean(datasetadj$`#characters_bio`[which(datasetadj$gender ==0)])
-which(is.na(datasettest$gender))
-
-nrow(datasettest)
-datasettest = dataset[-c(6,229,348),]
-
-
-
 
 #########main##########
 #Dataset description
@@ -282,7 +209,7 @@ datasetadj <- outlierremoval(datasetadj)
 
 pairs(datasetadj)
 
-  #Plot dataset for analysis
+#Plot dataset for analysis
 ggpairs(datasetadj)
 
 #Testing for normal distribution
@@ -295,6 +222,103 @@ checkNormLillie = uniNorm(datasetadj, type="Lillie" , desc=TRUE) # Lilliefors (K
 checkNormSF = uniNorm(datasetadj, type="SF" , desc=TRUE) # Shapiro-Francia's Normality Test
 checkNormAD = uniNorm(datasetadj, type="AD" , desc=TRUE) # Anderson-Darling's Normality Test
 
+hytest(datasetadj) #Shapiro-Wilk test
+
+#Clustering
+
+#Agglomerative on age and pickyness by gender [Better than k-Means!]
+x <- cbind(datasetadj[,1],datasetadj[,4])#, datasetadj[,2])
+x <- scale(x)
+x <- as.data.frame(x)
+colnames(x) <- c("age", "pickyness")#, "gender")
+d <- dist(x, method="euclidean")
+h <- hclust(d, method="single")
+plot(h) #2 clusters seems to be appropriate
+cluster <- cutree(h, k = 3)
+table(cluster,x[,3])
+ggplot(x, aes(age, pickyness, color = cluster)) + 
+  geom_point()
+
+#Agglomerative on #characters_bio and matches by gender [Better than k-Means!]
+x <- cbind(datasetadj[,5],datasetadj[,9], datasetadj[,2])
+x <- scale(x)
+x <- as.data.frame(x)
+colnames(x) <- c("char", "matches", "gender")
+d <- dist(x, method="euclidean")
+h <- hclust(d, method="single")
+plot(h) # 2 clusters seems to be appropriate
+c <- cutree(h, k = 2)
+table(c,x[,3])
+ggplot(x, aes(char, matches, color = c)) + 
+  geom_point()
+
+#Agglomerative on search radius and pickyness by gender [Better than k-Means!]
+x <- cbind(datasetadj[,4],datasetadj[,3], datasetadj[,2])
+x <- scale(x)
+x <- as.data.frame(x)
+colnames(x) <- c("pickyness", "search_radius", "gender")
+d <- dist(x, method="euclidean")
+h <- hclust(d, method="single")
+plot(h) # 2 clusters seems to be appropriate
+c <- cutree(h, k = 2)
+table(c,x[,3])
+ggplot(x, aes(pickyness, search_radius, color = c)) + 
+  geom_point()
+
+
+#Kmeans on pickyness and matches by gender
+x <- cbind(datasetadj[,4],datasetadj[,9])#, datasetadj[,2])
+#x <- removeValue(x,1,0)
+x <- scale(x)
+x <- as.data.frame(x)
+colnames(x) <- c("pickyness", "matches")#, "gender")
+
+km <- lapply(1:6, function(k) replicate(10, kmeans(x, centers = k)$tot.withinss))
+wss_k = sapply(1:6, function(k) mean(km[[k]]))
+
+plot(x = 1:6, y = log10(wss_k),
+     xlab = "k", ylab = expression("log(" * WSS[k] * ")"),
+     las = 1, pch = 19, type = "o")
+
+k <- kmeans(x, 2)
+table(k$cluster, x$gender)
+k$cluster <- as.factor(k$cluster)
+ggplot(x, aes(pickyness, matches, color = k$cluster)) + geom_point()
+
+#DBScan
+x <- cbind(datasetadj[,4],datasetadj[,3])
+x <- scale(x)
+x <- as.data.frame(x)
+colnames(x) <- c("pickyness", "search_radius")
+db <- dbscan(x, eps = .5, minPts = 4)
+ggplot(x, aes(pickyness, search_radius, color = db$cluster)) + geom_point()
+
+#TESTING K-MEANS
+x <- cbind(datasetadj[,1],datasetadj[,4])
+#x <- removeValue(x,1,0)
+x <- scale(x)
+x <- as.data.frame(x)
+colnames(x) <- c("age", "pickyness")
+
+km <- lapply(1:6, function(k) replicate(10, kmeans(x, centers = k)$tot.withinss))
+wss_k = sapply(1:6, function(k) mean(km[[k]]))
+
+plot(x = 1:6, y = log10(wss_k),
+     xlab = "k", ylab = expression("log(" * WSS[k] * ")"),
+     las = 1, pch = 19, type = "o")
+
+<<<<<<< HEAD
+  #Plot dataset for analysis
+ggpairs(datasetadj)
+=======
+k <- kmeans(x, 3)
+table(k$cluster, x$gender)
+k$cluster <- as.factor(k$cluster)
+ggplot(x, aes(age, pickyness, color = k$cluster)) + geom_point()
+>>>>>>> e9e71a5739a4f51b10e2f7601135cd56afebc2bf
+
+
+<<<<<<< HEAD
 MVN::hzTest(scale(datasetadj),qqplot = TRUE)
 
 MVN::mardiaTest(datasetadj[],qqplot = TRUE)
@@ -315,6 +339,8 @@ mnormdistplots(datasetadj)
 #descdist(datasetadj)
 
 #Clustering
+=======
+>>>>>>> e9e71a5739a4f51b10e2f7601135cd56afebc2bf
 #Showing number in bio - matches by gender
 ggplot(datasetadj, aes(datasetadj[,5], datasetadj[,9], color = datasetadj[,2])) + geom_point() + labs(x = "#characters_bio", y="matches", colour="gender")
 

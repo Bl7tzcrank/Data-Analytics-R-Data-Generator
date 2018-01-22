@@ -149,7 +149,7 @@ hytestexp <-function(data){
 
 #2. Dimensionality Reduction#
 
-#3. Cluster Analysis#
+#3. Cluster Analysis# (executed during main part)
 #function to remove observations with a certain value in a certain row
 removeValue <- function(data,l,v){
   k = 1
@@ -162,6 +162,65 @@ removeValue <- function(data,l,v){
   }
   return(data)
 }
+
+#plot tests
+xaxis = 4
+yaxis = 9
+
+ggplot(datasetadj, aes(datasetadj[,xaxis], datasetadj[,yaxis], color = datasetadj[,2])) + geom_point() + labs(x = colnames(datasetadj)[xaxis], y = colnames(datasetadj)[yaxis])
+pairs(datasetadj)
+
+#########main##########
+#Dataset description
+#We created a dataset adopting the flirting-app “Tinder”, but for slightly older people, naming it “Finder”. Each user creates a profile and is able to change some settings and upload pictures. Our dataset includes some of those settings, the number of pictures uploaded as well as a “picky factor” used by the providers of the app. In general, swiping right means that the user wants to match with the shown user, swiping left is the opposite. We are only implementing a heterosexual version with two genders, meaning that women are matched to men only and other way round. For a more detailled description of the features please see the according subsection.
+#We generate data for the following features:
+#Age
+#Gender (0=female, 1=male)
+#Search Radius
+#Picky-Factor
+#Number of Characters in Bio per User
+#Number of Pictures per User
+#Age Search Range
+#Matches
+
+#Data loading
+dataset = get(load("Datasets/data_01.rdata"))
+
+#Exploratory data analysis
+str(dataset)
+summary(dataset)
+#ggpairs(dataset[-c(1,3,11,15)])
+
+#Initial NA replacement
+datasetadj <- knnImputation(dataset[, !names(dataset) %in% "medv"], meth = "median")  # perform knn imputation.
+
+#Outlier detection
+pairs(datasetadj) #for detecting outliers visually
+allBoxPlots = boxplot(log10(dataset)) #Visualization of outliers by using log10 boxplots
+detectoutstand(datasetadj) #outlier detection outputting standardized values
+c = detectoutx(datasetadj) #outlier detection outputting X2plot
+
+#Outlier removal
+datasetadj <- outlierremoval(datasetadj)
+
+pairs(datasetadj)
+
+#Plot dataset for analysis
+ggpairs(datasetadj)
+
+#Testing for normal distribution
+normaldistplots(datasetadj) #visually by QQ-Plots
+mnormdistplots(datasetadj) #visually by QQ-Plot
+histo(datasetadj) #visually by histograms
+checkNormSW = uniNorm(datasetadj, type="SW" , desc=TRUE) # Shapiro-Wilk's Normality Test
+checkNormCVM = uniNorm(datasetadj, type="CVM" , desc=TRUE) # Cramer-von Mises's Normality test
+checkNormLillie = uniNorm(datasetadj, type="Lillie" , desc=TRUE) # Lilliefors (Kolmogrov-Smirnov) Normality Test
+checkNormSF = uniNorm(datasetadj, type="SF" , desc=TRUE) # Shapiro-Francia's Normality Test
+checkNormAD = uniNorm(datasetadj, type="AD" , desc=TRUE) # Anderson-Darling's Normality Test
+
+hytest(datasetadj) #Shapiro-Wilk test
+
+#Clustering
 
 #Agglomerative on age and pickyness by gender [Better than k-Means!]
 ggplot(datasetadj, aes(datasetadj[,1], datasetadj[,4], color = datasetadj[,2])) + geom_point()
@@ -233,72 +292,7 @@ colnames(x) <- c("pickyness", "search_radius")#, "gender")
 db <- dbscan(x, eps = .5, minPts = 4)
 plot(db$cluster)
 
-#plot tests
-xaxis = 4
-yaxis = 9
 
-ggplot(datasetadj, aes(datasetadj[,xaxis], datasetadj[,yaxis], color = datasetadj[,2])) + geom_point() + labs(x = colnames(datasetadj)[xaxis], y = colnames(datasetadj)[yaxis])
-pairs(datasetadj)
-
-mean(datasetadj$`#characters_bio`[which(datasetadj$gender ==0)])
-which(is.na(datasettest$gender))
-
-nrow(datasettest)
-datasettest = dataset[-c(6,229,348),]
-
-
-
-
-#########main##########
-#Dataset description
-#We created a dataset adopting the flirting-app “Tinder”, but for slightly older people, naming it “Finder”. Each user creates a profile and is able to change some settings and upload pictures. Our dataset includes some of those settings, the number of pictures uploaded as well as a “picky factor” used by the providers of the app. In general, swiping right means that the user wants to match with the shown user, swiping left is the opposite. We are only implementing a heterosexual version with two genders, meaning that women are matched to men only and other way round. For a more detailled description of the features please see the according subsection.
-#We generate data for the following features:
-#Age
-#Gender (0=female, 1=male)
-#Search Radius
-#Picky-Factor
-#Number of Characters in Bio per User
-#Number of Pictures per User
-#Age Search Range
-#Matches
-
-#Data loading
-dataset = get(load("Datasets/data_01.rdata"))
-
-#Exploratory data analysis
-str(dataset)
-summary(dataset)
-#ggpairs(dataset[-c(1,3,11,15)])
-
-#Initial NA replacement
-datasetadj <- knnImputation(dataset[, !names(dataset) %in% "medv"], meth = "median")  # perform knn imputation.
-
-#Outlier detection
-pairs(datasetadj) #for detecting outliers visually
-allBoxPlots = boxplot(log10(dataset)) #Visualization of outliers by using log10 boxplots
-detectoutstand(datasetadj) #outlier detection outputting standardized values
-c = detectoutx(datasetadj) #outlier detection outputting X2plot
-
-#Outlier removal
-datasetadj <- outlierremoval(datasetadj)
-
-pairs(datasetadj)
-
-#Plot dataset for analysis
-ggpairs(datasetadj)
-
-#Testing for normal distribution
-normaldistplots(datasetadj) #visually by QQ-Plots
-mnormdistplots(datasetadj) #visually by QQ-Plot
-histo(datasetadj) #visually by histograms
-checkNormSW = uniNorm(datasetadj, type="SW" , desc=TRUE) # Shapiro-Wilk's Normality Test
-checkNormCVM = uniNorm(datasetadj, type="CVM" , desc=TRUE) # Cramer-von Mises's Normality test
-checkNormLillie = uniNorm(datasetadj, type="Lillie" , desc=TRUE) # Lilliefors (Kolmogrov-Smirnov) Normality Test
-checkNormSF = uniNorm(datasetadj, type="SF" , desc=TRUE) # Shapiro-Francia's Normality Test
-checkNormAD = uniNorm(datasetadj, type="AD" , desc=TRUE) # Anderson-Darling's Normality Test
-
-hytest(datasetadj) #Shapiro-Wilk test
-#Clustering
 #Showing number in bio - matches by gender
 ggplot(datasetadj, aes(datasetadj[,5], datasetadj[,9], color = datasetadj[,2])) + geom_point() + labs(x = "#characters_bio", y="matches", colour="gender")
 

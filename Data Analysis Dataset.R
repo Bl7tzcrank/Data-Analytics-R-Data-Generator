@@ -149,7 +149,47 @@ hytestexp <-function(data){
 
 #2. Dimensionality Reduction#
 
-#3. Cluster Analysis# (executed during main part)
+#3. Cluster Analysis
+
+#creates a dendrogram for the features f1, f2 of data with the given clustering method
+agglomerative_dendrogram = function(data, f1, f2, method = "single"){
+  x <- cbind(datasetadj[,f1],datasetadj[,f2])
+  x <- scale(x)
+  x <- as.data.frame(x)
+  colnames(x) <- c(colnames(data)[f1], colnames(data)[f2])
+  d <- dist(x, method="euclidean")
+  h <- hclust(d, method=method)
+  plot(h)
+  return(h)
+}
+
+#creates the scree-plot of k = 1..6 and 10 replicates of the kmeans algorithm
+#applied on the features 1 and 2 of the data-frame data.
+kmeans_screeplot = function(data, f1, f2){
+  x <- cbind(datasetadj[,f1],datasetadj[,f2])
+  x <- scale(x)
+  x <- as.data.frame(x)
+  colnames(x) <- c(colnames(data)[f1], colnames(data)[f2])
+  
+  km <- lapply(1:6, function(k) replicate(10, kmeans(x, centers = k)$tot.withinss))
+  wss_k = sapply(1:6, function(k) mean(km[[k]]))
+  
+  plot(x = 1:6, y = log10(wss_k),
+       xlab = "k", ylab = expression("log(" * WSS[k] * ")"),
+       las = 1, pch = 19, type = "o")
+  return(x)
+}
+
+#Plots f1-f2 diagram with colours for calculated clusters
+dbscan_plot = function(data, f1, f2, eps = .5, minpts = 10){
+  x <- cbind(datasetadj[,f1],datasetadj[,f2])
+  x <- scale(x)
+  x <- as.data.frame(x)
+  colnames(x) <- c(colnames(data)[f1], colnames(data)[f2])
+  db <- dbscan(x, eps = eps, minPts = minpts)
+  ggplot(x, aes(data[,f1], data[,f2], color = db$cluster)) + geom_point()
+}
+
 #function to remove observations with a certain value in a certain row
 removeValue <- function(data,l,v){
   k = 1
@@ -163,14 +203,9 @@ removeValue <- function(data,l,v){
   return(data)
 }
 
-#plot tests
-xaxis = 6
-yaxis = 9
+######### end of function declaration ############
 
-ggplot(datasetadj, aes(datasetadj[,xaxis], datasetadj[,yaxis], color = datasetadj[,2])) + geom_point() + labs(x = colnames(datasetadj)[xaxis], y = colnames(datasetadj)[yaxis])
-pairs(datasetadj)
-
-#########main##########
+######### main ##########
 #Dataset description
 #We created a dataset adopting the flirting-app “Tinder”, but for slightly older people, naming it “Finder”. Each user creates a profile and is able to change some settings and upload pictures. Our dataset includes some of those settings, the number of pictures uploaded as well as a “picky factor” used by the providers of the app. In general, swiping right means that the user wants to match with the shown user, swiping left is the opposite. We are only implementing a heterosexual version with two genders, meaning that women are matched to men only and other way round. For a more detailled description of the features please see the according subsection.
 #We generate data for the following features:
@@ -220,101 +255,133 @@ checkNormAD = uniNorm(datasetadj, type="AD" , desc=TRUE) # Anderson-Darling's No
 
 hytest(datasetadj) #Shapiro-Wilk test
 
-#Clustering
+##Clustering
+#Only relations without gender (the results are obviously clustered after the two genders) and not
+#between age_min or age_max because there are proportional to the age.
+#We tried dbscan, agglomerative approaches(single-linkage, complete-linkage, centroid, average, ward) and
+#k-means on the data. The most appropriate clustering was chosen and kept here.
 
-#Agglomerative on age and pickyness by gender [Better than k-Means!]
-x <- cbind(datasetadj[,1],datasetadj[,4])#, datasetadj[,2])
-x <- scale(x)
-x <- as.data.frame(x)
-colnames(x) <- c("age", "pickyness")#, "gender")
-d <- dist(x, method="euclidean")
-h <- hclust(d, method="single")
-plot(h) #2 clusters seems to be appropriate
-cluster <- cutree(h, k = 3)
-table(cluster,x[,3])
-ggplot(x, aes(age, pickyness, color = cluster)) + 
-  geom_point()
-
-#Agglomerative on #characters_bio and matches by gender [Better than k-Means!]
-x <- cbind(datasetadj[,5],datasetadj[,9], datasetadj[,2])
-x <- scale(x)
-x <- as.data.frame(x)
-colnames(x) <- c("char", "matches", "gender")
-d <- dist(x, method="euclidean")
-h <- hclust(d, method="single")
-plot(h) # 2 clusters seems to be appropriate
-c <- cutree(h, k = 2)
-table(c,x[,3])
-ggplot(x, aes(char, matches, color = c)) + 
-  geom_point()
-
-#Agglomerative on search radius and pickyness by gender [Better than k-Means!]
-x <- cbind(datasetadj[,4],datasetadj[,3], datasetadj[,2])
-x <- scale(x)
-x <- as.data.frame(x)
-colnames(x) <- c("pickyness", "search_radius", "gender")
-d <- dist(x, method="euclidean")
-h <- hclust(d, method="single")
-plot(h) # 2 clusters seems to be appropriate
-c <- cutree(h, k = 2)
-table(c,x[,3])
-ggplot(x, aes(pickyness, search_radius, color = c)) + 
-  geom_point()
-
-
-#Kmeans on pickyness and matches by gender
-x <- cbind(datasetadj[,4],datasetadj[,9])#, datasetadj[,2])
-#x <- removeValue(x,1,0)
-x <- scale(x)
-x <- as.data.frame(x)
-colnames(x) <- c("pickyness", "matches")#, "gender")
-
-km <- lapply(1:6, function(k) replicate(10, kmeans(x, centers = k)$tot.withinss))
-wss_k = sapply(1:6, function(k) mean(km[[k]]))
-
-plot(x = 1:6, y = log10(wss_k),
-     xlab = "k", ylab = expression("log(" * WSS[k] * ")"),
-     las = 1, pch = 19, type = "o")
-
-k <- kmeans(x, 2)
-table(k$cluster, x$gender)
+#Kmeans on age and search_radius
+f1 = 1
+f2 = 3
+x <- kmeans_screeplot(datasetadj, f1, f2)
+k <- kmeans(x, 3) #clusters indicated by scree-plot
 k$cluster <- as.factor(k$cluster)
-ggplot(x, aes(pickyness, matches, color = k$cluster)) + geom_point()
+ggplot(x, aes(datasetadj[,f1], datasetadj[,f2], color = k$cluster)) + geom_point() + labs(x = colnames(datasetadj)[f1], y = colnames(datasetadj)[f2], color = "cluster")
 
-#DBScan
-x <- cbind(datasetadj[,4],datasetadj[,3])
-x <- scale(x)
-x <- as.data.frame(x)
-colnames(x) <- c("pickyness", "search_radius")
-db <- dbscan(x, eps = .5, minPts = 4)
-ggplot(x, aes(pickyness, search_radius, color = db$cluster)) + geom_point()
-
-#TESTING K-MEANS
-x <- cbind(datasetadj[,1],datasetadj[,4])
-#x <- removeValue(x,1,0)
-x <- scale(x)
-x <- as.data.frame(x)
-colnames(x) <- c("age", "pickyness")
-
-km <- lapply(1:6, function(k) replicate(10, kmeans(x, centers = k)$tot.withinss))
-wss_k = sapply(1:6, function(k) mean(km[[k]]))
-
-plot(x = 1:6, y = log10(wss_k),
-     xlab = "k", ylab = expression("log(" * WSS[k] * ")"),
-     las = 1, pch = 19, type = "o")
-
-k <- kmeans(x, 3)
-table(k$cluster, x$gender)
+#Kmeans on age and pickyness
+f1 = 1
+f2 = 4
+x <- kmeans_screeplot(datasetadj, f1, f2)
+k <- kmeans(x, 3) #clusters indicated by scree-plot
 k$cluster <- as.factor(k$cluster)
-ggplot(x, aes(age, pickyness, color = k$cluster)) + geom_point()
+ggplot(x, aes(datasetadj[,f1], datasetadj[,f2], color = k$cluster)) + geom_point() + labs(x = colnames(datasetadj)[f1], y = colnames(datasetadj)[f2], color = "cluster")
 
+#Agglomerative on age and #characters_bio
+f1 = 1
+f2 = 5
+x <- as.data.frame(scale(cbind(datasetadj[,f1],datasetadj[,f2])))
+h <- agglomerative_dendrogram(datasetadj, f1, f2, method = "complete")
+c <- cutree(h, k = 2) #clusters indicated by dendrogram
+ggplot(x, aes(datasetadj[,f1], datasetadj[,f2], color = c)) + geom_point() + labs(x = colnames(datasetadj)[f1], y = colnames(datasetadj)[f2], color = "cluster")
 
-#Showing number in bio - matches by gender
-ggplot(datasetadj, aes(datasetadj[,5], datasetadj[,9], color = datasetadj[,2])) + geom_point() + labs(x = "#characters_bio", y="matches", colour="gender")
+#Kmeans on age and #pictures
+f1 = 1
+f2 = 6
+x <- kmeans_screeplot(datasetadj, f1, f2)
+k <- kmeans(x, 3) #clusters indicated by scree-plot
+k$cluster <- as.factor(k$cluster)
+ggplot(x, aes(datasetadj[,f1], datasetadj[,f2], color = k$cluster)) + geom_point() + labs(x = colnames(datasetadj)[f1], y = colnames(datasetadj)[f2], color = "cluster")
 
+#Kmeans on age and matches
+f1 = 1
+f2 = 9
+x <- kmeans_screeplot(datasetadj, f1, f2)
+k <- kmeans(x, 3) #clusters indicated by scree-plot
+k$cluster <- as.factor(k$cluster)
+ggplot(x, aes(datasetadj[,f1], datasetadj[,f2], color = k$cluster)) + geom_point() + labs(x = colnames(datasetadj)[f1], y = colnames(datasetadj)[f2], color = "cluster")
 
-#ggplot(datasetadj, aes(datasetadj[,4], datasetadj[,5])) + geom_point()
-#pairs(datasetadj)
+#Agglomerative on search radius and pickyness
+f1 = 3
+f2 = 4
+x <- as.data.frame(scale(cbind(datasetadj[,f1],datasetadj[,f2])))
+h <- agglomerative_dendrogram(datasetadj, f1, f2, method = "ward.D2")
+c <- cutree(h, k = 3) #clusters indicated by dendrogram
+ggplot(x, aes(datasetadj[,f1], datasetadj[,f2], color = c)) + geom_point() + labs(x = colnames(datasetadj)[f1], y = colnames(datasetadj)[f2], color = "cluster")
+
+#Kmeans on search_radius and #characters_bio
+f1 = 3
+f2 = 5
+x <- kmeans_screeplot(datasetadj, f1, f2)
+k <- kmeans(x, 3) #clusters indicated by scree-plot
+k$cluster <- as.factor(k$cluster)
+ggplot(x, aes(datasetadj[,f1], datasetadj[,f2], color = k$cluster)) + geom_point() + labs(x = colnames(datasetadj)[f1], y = colnames(datasetadj)[f2], color = "cluster")
+
+#Agglomerative on search_radius and #pictures
+f1 = 3
+f2 = 6
+x <- as.data.frame(scale(cbind(datasetadj[,f1],datasetadj[,f2])))
+h <- agglomerative_dendrogram(datasetadj, f1, f2, method = "complete")
+c <- cutree(h, k = 2) #clusters indicated by dendrogram
+ggplot(x, aes(datasetadj[,f1], datasetadj[,f2], color = c)) + geom_point() + labs(x = colnames(datasetadj)[f1], y = colnames(datasetadj)[f2], color = "cluster")
+
+#Kmeans on search_radius and matches
+f1 = 3
+f2 = 9
+x <- kmeans_screeplot(datasetadj, f1, f2)
+k <- kmeans(x, 3) #clusters indicated by scree-plot
+k$cluster <- as.factor(k$cluster)
+ggplot(x, aes(datasetadj[,f1], datasetadj[,f2], color = k$cluster)) + geom_point() + labs(x = colnames(datasetadj)[f1], y = colnames(datasetadj)[f2], color = "cluster")
+
+#Agglomerative on pickyness and #characters_bio
+f1 = 4
+f2 = 5
+x <- as.data.frame(scale(cbind(datasetadj[,f1],datasetadj[,f2])))
+h <- agglomerative_dendrogram(datasetadj, f1, f2, method = "complete")
+c <- cutree(h, k = 2) #clusters indicated by dendrogram
+ggplot(x, aes(datasetadj[,f1], datasetadj[,f2], color = c)) + geom_point() + labs(x = colnames(datasetadj)[f1], y = colnames(datasetadj)[f2], color = "cluster")
+
+#Agglomerative on pickyness and #pictures
+f1 = 4
+f2 = 6
+x <- as.data.frame(scale(cbind(datasetadj[,f1],datasetadj[,f2])))
+h <- agglomerative_dendrogram(datasetadj, f1, f2, method = "complete")
+c <- cutree(h, k = 2) #clusters indicated by dendrogram
+ggplot(x, aes(datasetadj[,f1], datasetadj[,f2], color = c)) + geom_point() + labs(x = colnames(datasetadj)[f1], y = colnames(datasetadj)[f2], color = "cluster")
+
+#Kmeans on pickyness and matches
+f1 = 4
+f2 = 9
+x <- kmeans_screeplot(datasetadj, f1, f2)
+k <- kmeans(x, 2) #clusters indicated by scree-plot
+k$cluster <- as.factor(k$cluster)
+ggplot(x, aes(datasetadj[,f1], datasetadj[,f2], color = k$cluster)) + geom_point() + labs(x = colnames(datasetadj)[f1], y = colnames(datasetadj)[f2], color = "cluster")
+
+#Kmeans on #characters_bio and #pictures
+f1 = 5
+f2 = 6
+x <- kmeans_screeplot(datasetadj, f1, f2)
+k <- kmeans(x, 3) #clusters indicated by scree-plot
+k$cluster <- as.factor(k$cluster)
+ggplot(x, aes(datasetadj[,f1], datasetadj[,f2], color = k$cluster)) + geom_point() + labs(x = colnames(datasetadj)[f1], y = colnames(datasetadj)[f2], color = "cluster")
+
+#Agglomerative on #characters_bio and matches
+f1 = 5
+f2 = 9
+x <- as.data.frame(scale(cbind(datasetadj[,f1],datasetadj[,f2])))
+h <- agglomerative_dendrogram(datasetadj, f1, f2, method = "ward.D2")
+c <- cutree(h, k = 3) #clusters indicated by dendrogram
+ggplot(x, aes(datasetadj[,f1], datasetadj[,f2], color = c)) + geom_point() + labs(x = colnames(datasetadj)[f1], y = colnames(datasetadj)[f2], color = "cluster")
+
+#Kmeans on #pictures and matches
+f1 = 6
+f2 = 9
+x <- kmeans_screeplot(datasetadj, f1, f2)
+k <- kmeans(x, 2) #clusters indicated by scree-plot
+k$cluster <- as.factor(k$cluster)
+ggplot(x, aes(datasetadj[,f1], datasetadj[,f2], color = k$cluster)) + geom_point() + labs(x = colnames(datasetadj)[f1], y = colnames(datasetadj)[f2], color = "cluster")
+
+##End of clustering
 
 pairs(datasetadj, col=ifelse(datasetadj$gender==0, "red", "blue"))
 

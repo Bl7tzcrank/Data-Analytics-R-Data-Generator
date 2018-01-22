@@ -8,6 +8,10 @@ install.packages("mvoutlier")
 install.packages("proxy")
 install.packages("dbscan")
 install.packages("MVN")
+install.packages("factoextra")
+install.packages("rgl")
+library(rgl)
+library(factoextra)
 library(MVN)
 library(proxy)
 library(mvoutlier)
@@ -15,6 +19,9 @@ library(GGally)
 library(ggplot2)
 library(DMwR)
 library(dbscan)
+
+
+
 
 #########functions##########
 
@@ -255,6 +262,23 @@ checkNormAD = uniNorm(datasetadj, type="AD" , desc=TRUE) # Anderson-Darling's No
 
 hytest(datasetadj) #Shapiro-Wilk test
 
+MVN::hzTest(scale(datasetadj),qqplot = TRUE)
+
+MVN::mardiaTest(datasetadj[],qqplot = TRUE)
+
+MVN::mvnPlot(MVN::hzTest(datasetadj[,c(7,8)]))
+
+MVN::uniPlot(datasetadj)
+
+MVN::mvnPlot(datasetadj[,c(1,8)])
+
+mnormdistplots(datasetadj)
+
+#Should we check for the actual distribution
+#install.packages("fitdistrplus")
+#library(fitdistrplus)
+#descdist(datasetadj)
+
 ##Clustering
 #Only relations without gender (the results are obviously clustered after the two genders) and not
 #between age_min or age_max because there are proportional to the age.
@@ -357,6 +381,7 @@ k <- kmeans(x, 2) #clusters indicated by scree-plot
 k$cluster <- as.factor(k$cluster)
 ggplot(x, aes(datasetadj[,f1], datasetadj[,f2], color = k$cluster)) + geom_point() + labs(x = colnames(datasetadj)[f1], y = colnames(datasetadj)[f2], color = "cluster")
 
+
 #Kmeans on #characters_bio and #pictures
 f1 = 5
 f2 = 6
@@ -385,8 +410,72 @@ ggplot(x, aes(datasetadj[,f1], datasetadj[,f2], color = k$cluster)) + geom_point
 
 pairs(datasetadj, col=ifelse(datasetadj$gender==0, "red", "blue"))
 
-
-
 #PCA
+#Exclude supplementary qualitative variable from the PCA (naming Gender and Search Radius)
+pr.comp = prcomp(datasetadj[,-c(2,3)], center = TRUE, scale=TRUE)#singular value decomposition
+#pr.incomp = princomp(datasetadj[,-c(2,3)], cor=TRUE, scores=TRUE) #spectral decomposition approach
 
+#Scree plot
+eig.val <- get_eigenvalue(pr.comp) # Numerical representation of eigenvalues of the PCA
+fviz_eig(pr.comp, addlabels = TRUE) # Visual representation of eigenvalues of the PCA
+
+#Supplementary qualitative variables are prepared to use them for grouping the data later on
+groupsgender <- as.factor(datasetadj$gender)
+groupsRange <- as.factor(round(datasetadj$search_radius,0))
+
+#Visualisation
+
+fviz_pca_var(pr.comp,
+             axes = c(1,2),
+             col.var = "contrib", # Color by contributions to the PC
+             gradient.cols = c("#00AFBB", "#E7B800", "#FC4E07"),
+             repel = TRUE     # Avoid text overlapping
+)
+
+fviz_pca_var(pr.comp,
+             axes = c(3,2),
+             col.var = "contrib", # Color by contributions to the PC
+             gradient.cols = c("#00AFBB", "#E7B800", "#FC4E07"),
+             repel = TRUE     # Avoid text overlapping
+)
+
+fviz_pca_biplot(pr.comp,
+                axes = c(3,2),
+                col.var = "black",
+                col.ind = groupsgender,
+                palette = c("#00AFBB",  "#FC4E07"),
+                label = "var"
+)
+
+fviz_pca_biplot(pr.comp,
+                axes = c(3,2),
+                col.var = "black",
+                col.ind = groupsRange,
+                #palette = c("#00AFBB",  "#FC4E07"),
+                label = "var"
+)
+
+
+
+z <- sapply(groupsgender,function(x){
+  if (x == 1 ) {x=1}else{x=2}
+})
+
+#3D plot highlighting the search radius
+plot3d(pr.comp$x[,1:3], col = groupsRange, size=4)
+text3d(pr.comp$rotation[,1:3], texts=rownames(pr.comp$rotation), col="red")
+coords <- NULL
+for (i in 1:nrow(pr.comp$rotation)) {
+  coords <- rbind(coords, rbind(c(0,0,0),pr.comp$rotation[i,1:3]))
+}
+lines3d(coords, col="red", lwd=4)
+
+#3D plot highlighting the gender cluster
+plot3d(pr.comp$x[,1:3], col = z, size=4)
+text3d(pr.comp$rotation[,1:3], texts=rownames(pr.comp$rotation), col="red")
+coords <- NULL
+for (i in 1:nrow(pr.comp$rotation)) {
+  coords <- rbind(coords, rbind(c(0,0,0),pr.comp$rotation[i,1:3]))
+}
+lines3d(coords, col="red", lwd=4)
 

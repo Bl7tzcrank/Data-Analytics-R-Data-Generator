@@ -229,6 +229,18 @@ checkNormLillie = uniNorm(datasetadj, type="Lillie" , desc=TRUE) # Lilliefors (K
 checkNormSF = uniNorm(datasetadj, type="SF" , desc=TRUE) # Shapiro-Francia's Normality Test
 checkNormAD = uniNorm(datasetadj, type="AD" , desc=TRUE) # Anderson-Darling's Normality Test
 
+MVN::hzTest(datasetadj[,c(1,3,7,8)],qqplot = TRUE)
+
+MVN::mardiaTest(datasetadj[,c(1,3,7,8)],qqplot = TRUE)
+
+MVN::roystonTest(datasetadj[,c(1,3,7,8)],qqplot = TRUE)
+
+uniPlot(scale(datasetadj),type="qqplot")
+
+uniPlot(scale(datasetadj),type="histogram")
+
+mnormdistplots(datasetadj)
+
 hytest(datasetadj) #Shapiro-Wilk test
 
 #Clustering
@@ -326,19 +338,7 @@ ggplot(x, aes(age, pickyness, color = k$cluster)) + geom_point()
 
 
 <<<<<<< HEAD
-MVN::hzTest(scale(datasetadj),qqplot = TRUE)
 
-MVN::mardiaTest(datasetadj[],qqplot = TRUE)
-
-
-
-MVN::mvnPlot(MVN::hzTest(datasetadj[,c(7,8)]))
-
-MVN::uniPlot(datasetadj)
-
-MVN::mvnPlot(datasetadj[,c(1,8)])
-
-mnormdistplots(datasetadj)
 
 #Should we check for the actual distribution
 #install.packages("fitdistrplus")

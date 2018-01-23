@@ -398,9 +398,8 @@ ggplot(x, aes(datasetadj[,f1], datasetadj[,f2], color = k$cluster)) + geom_point
 #PCA
 #Exclude supplementary qualitative variable from the PCA (naming Gender and Search Radius)
 pr.comp = prcomp(datasetadj[,-c(2,3)], center = TRUE, scale=TRUE)#singular value decomposition
-#pr.incomp = princomp(datasetadj[,-c(2,3)], cor=TRUE, scores=TRUE) #spectral decomposition approach
 
-#Scree plot
+#Calculate and visualize Scree plot
 eig.val <- get_eigenvalue(pr.comp) # Numerical representation of eigenvalues of the PCA
 fviz_eig(pr.comp, addlabels = TRUE) # Visual representation of eigenvalues of the PCA
 
@@ -408,15 +407,15 @@ fviz_eig(pr.comp, addlabels = TRUE) # Visual representation of eigenvalues of th
 groupsgender <- as.factor(datasetadj$gender)
 groupsRange <- as.factor(round(datasetadj$search_radius,0))
 
-#Visualisation
-
+#Visualisation of variable impact
+#PC 1 and 2
 fviz_pca_var(pr.comp,
              axes = c(1,2),
              col.var = "contrib", # Color by contributions to the PC
              gradient.cols = c("#00AFBB", "#E7B800", "#FC4E07"),
              repel = TRUE     # Avoid text overlapping
 )
-
+#PC 2 and 3
 fviz_pca_var(pr.comp,
              axes = c(3,2),
              col.var = "contrib", # Color by contributions to the PC
@@ -424,6 +423,8 @@ fviz_pca_var(pr.comp,
              repel = TRUE     # Avoid text overlapping
 )
 
+#Visualisation of biplot with supplementary variables
+#PC 1 and 2
 fviz_pca_biplot(pr.comp,
                 axes = c(3,2),
                 col.var = "black",
@@ -431,7 +432,7 @@ fviz_pca_biplot(pr.comp,
                 palette = c("#00AFBB",  "#FC4E07"),
                 label = "var"
 )
-
+#PC 1 and 2
 fviz_pca_biplot(pr.comp,
                 axes = c(3,2),
                 col.var = "black",
@@ -441,7 +442,7 @@ fviz_pca_biplot(pr.comp,
 )
 
 
-
+#Adjustment of gender such that 3D plotting works
 z <- sapply(groupsgender,function(x){
   if (x == 1 ) {x=1}else{x=2}
 })

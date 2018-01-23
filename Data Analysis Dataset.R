@@ -226,7 +226,7 @@ detectoutx(datasetadj) #outlier detection outputting X2plot
 
 #Outlier removal
 #This function would remove all outliers.
-#However we decided to keep them because there are realistic and they
+#However we decided to keep them because there are realistic and the few of them
 #do not mess with our data.
 datasetadj <- outlierremoval(datasetadj)
 

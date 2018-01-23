@@ -274,104 +274,6 @@ mnormdistplots(datasetadj)
 
 hytest(datasetadj) #Shapiro-Wilk test
 
-<<<<<<< HEAD
-#Clustering
-
-#Agglomerative on age and pickyness by gender [Better than k-Means!]
-x <- cbind(datasetadj[,1],datasetadj[,4])#, datasetadj[,2])
-x <- scale(x)
-x <- as.data.frame(x)
-colnames(x) <- c("age", "pickyness")#, "gender")
-d <- dist(x, method="euclidean")
-h <- hclust(d, method="single")
-plot(h) #2 clusters seems to be appropriate
-cluster <- cutree(h, k = 3)
-table(cluster,x[,3])
-ggplot(x, aes(age, pickyness, color = cluster)) + 
-  geom_point()
-
-#Agglomerative on #characters_bio and matches by gender [Better than k-Means!]
-x <- cbind(datasetadj[,5],datasetadj[,9], datasetadj[,2])
-x <- scale(x)
-x <- as.data.frame(x)
-colnames(x) <- c("char", "matches", "gender")
-d <- dist(x, method="euclidean")
-h <- hclust(d, method="single")
-plot(h) # 2 clusters seems to be appropriate
-c <- cutree(h, k = 2)
-table(c,x[,3])
-ggplot(x, aes(char, matches, color = c)) + 
-  geom_point()
-
-#Agglomerative on search radius and pickyness by gender [Better than k-Means!]
-x <- cbind(datasetadj[,4],datasetadj[,3], datasetadj[,2])
-x <- scale(x)
-x <- as.data.frame(x)
-colnames(x) <- c("pickyness", "search_radius", "gender")
-d <- dist(x, method="euclidean")
-h <- hclust(d, method="single")
-plot(h) # 2 clusters seems to be appropriate
-c <- cutree(h, k = 2)
-table(c,x[,3])
-ggplot(x, aes(pickyness, search_radius, color = c)) + 
-  geom_point()
-
-
-#Kmeans on pickyness and matches by gender
-x <- cbind(datasetadj[,4],datasetadj[,9])#, datasetadj[,2])
-#x <- removeValue(x,1,0)
-x <- scale(x)
-x <- as.data.frame(x)
-colnames(x) <- c("pickyness", "matches")#, "gender")
-
-km <- lapply(1:6, function(k) replicate(10, kmeans(x, centers = k)$tot.withinss))
-wss_k = sapply(1:6, function(k) mean(km[[k]]))
-
-plot(x = 1:6, y = log10(wss_k),
-     xlab = "k", ylab = expression("log(" * WSS[k] * ")"),
-     las = 1, pch = 19, type = "o")
-
-k <- kmeans(x, 2)
-table(k$cluster, x$gender)
-k$cluster <- as.factor(k$cluster)
-ggplot(x, aes(pickyness, matches, color = k$cluster)) + geom_point()
-
-#DBScan
-x <- cbind(datasetadj[,4],datasetadj[,3])
-x <- scale(x)
-x <- as.data.frame(x)
-colnames(x) <- c("pickyness", "search_radius")
-db <- dbscan(x, eps = .5, minPts = 4)
-ggplot(x, aes(pickyness, search_radius, color = db$cluster)) + geom_point()
-
-#TESTING K-MEANS
-x <- cbind(datasetadj[,1],datasetadj[,4])
-#x <- removeValue(x,1,0)
-x <- scale(x)
-x <- as.data.frame(x)
-colnames(x) <- c("age", "pickyness")
-
-km <- lapply(1:6, function(k) replicate(10, kmeans(x, centers = k)$tot.withinss))
-wss_k = sapply(1:6, function(k) mean(km[[k]]))
-
-plot(x = 1:6, y = log10(wss_k),
-     xlab = "k", ylab = expression("log(" * WSS[k] * ")"),
-     las = 1, pch = 19, type = "o")
-
-<<<<<<< HEAD
-  #Plot dataset for analysis
-ggpairs(datasetadj)
-=======
-k <- kmeans(x, 3)
-table(k$cluster, x$gender)
-k$cluster <- as.factor(k$cluster)
-ggplot(x, aes(age, pickyness, color = k$cluster)) + geom_point()
->>>>>>> e9e71a5739a4f51b10e2f7601135cd56afebc2bf
-
-
-<<<<<<< HEAD
-
-=======
 MVN::hzTest(scale(datasetadj),qqplot = TRUE)
 
 MVN::mardiaTest(datasetadj[],qqplot = TRUE)
@@ -383,7 +285,6 @@ MVN::uniPlot(datasetadj)
 MVN::mvnPlot(datasetadj[,c(1,8)])
 
 mnormdistplots(datasetadj)
->>>>>>> 3d0dd8b3299730376590d11176b80e9665d70c8e
 
 #Should we check for the actual distribution
 #install.packages("fitdistrplus")

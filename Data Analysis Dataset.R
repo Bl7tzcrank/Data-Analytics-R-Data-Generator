@@ -243,36 +243,28 @@ checkNormLillie = uniNorm(datasetadj, type="Lillie" , desc=TRUE) # Lilliefors (K
 checkNormSF = uniNorm(datasetadj, type="SF" , desc=TRUE) # Shapiro-Francia's Normality Test
 checkNormAD = uniNorm(datasetadj, type="AD" , desc=TRUE) # Anderson-Darling's Normality Test
 
-MVN::hzTest(datasetadj[,c(1,3,7,8)],qqplot = TRUE)
+#Check for multivariate normal distribution
+mnormdistplots(datasetadj[,c(1,3,8)]) #visual check
 
-MVN::mardiaTest(datasetadj[,c(1,3,7,8)],qqplot = TRUE)
+#test for age, search radius and age_max
+MVN::hzTest(datasetadj[,c(1,3,8)],qqplot = TRUE)
+MVN::mardiaTest(datasetadj[,c(1,3,8)],qqplot = TRUE)
+MVN::roystonTest(datasetadj[,c(1,3,8)],qqplot = TRUE)
 
-MVN::roystonTest(datasetadj[,c(1,3,7,8)],qqplot = TRUE)
+#test for age and search radius
+MVN::hzTest(datasetadj[,c(1,3)],qqplot = TRUE)
+MVN::mardiaTest(datasetadj[,c(1,3)],qqplot = TRUE)
+MVN::roystonTest(datasetadj[,c(1,3)],qqplot = TRUE)
 
-uniPlot(scale(datasetadj),type="qqplot")
+#test for age and age_max
+MVN::hzTest(datasetadj[,c(1,8)],qqplot = TRUE)
+MVN::mardiaTest(datasetadj[,c(1,8)],qqplot = TRUE)
+MVN::roystonTest(datasetadj[,c(1,8)],qqplot = TRUE)
 
-uniPlot(scale(datasetadj),type="histogram")
-
-mnormdistplots(datasetadj)
-
-hytest(datasetadj) #Shapiro-Wilk test
-
-MVN::hzTest(scale(datasetadj),qqplot = TRUE)
-
-MVN::mardiaTest(datasetadj[],qqplot = TRUE)
-
-MVN::mvnPlot(MVN::hzTest(datasetadj[,c(7,8)]))
-
-MVN::uniPlot(datasetadj)
-
-MVN::mvnPlot(datasetadj[,c(1,8)])
-
-mnormdistplots(datasetadj)
-
-#Should we check for the actual distribution
-#install.packages("fitdistrplus")
-#library(fitdistrplus)
-#descdist(datasetadj)
+#test for search radius and age_max
+MVN::hzTest(datasetadj[,c(8,3)],qqplot = TRUE)
+MVN::mardiaTest(datasetadj[,c(8,3)],qqplot = TRUE)
+MVN::roystonTest(datasetadj[,c(8,3)],qqplot = TRUE)
 
 ##Clustering
 #Only relations without gender (the results are obviously clustered after the two genders) and not

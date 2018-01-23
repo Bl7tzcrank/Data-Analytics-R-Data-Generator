@@ -214,7 +214,6 @@ dataset = get(load("Datasets/data_01.rdata"))
 #Exploratory data analysis
 str(dataset)
 summary(dataset)
-#ggpairs(dataset[-c(1,3,11,15)])
 
 #Initial NA replacement
 datasetadj <- knnImputation(dataset[, !names(dataset) %in% "medv"], meth = "median")  # perform knn imputation.
@@ -223,12 +222,13 @@ datasetadj <- knnImputation(dataset[, !names(dataset) %in% "medv"], meth = "medi
 pairs(datasetadj) #for detecting outliers visually
 allBoxPlots = boxplot(log10(dataset)) #Visualization of outliers by using log10 boxplots
 detectoutstand(datasetadj) #outlier detection outputting standardized values
-c = detectoutx(datasetadj) #outlier detection outputting X2plot
+detectoutx(datasetadj) #outlier detection outputting X2plot
 
 #Outlier removal
+#This function would remove all outliers.
+#However we decided to keep them because there are realistic and they
+#do not mess with our data.
 datasetadj <- outlierremoval(datasetadj)
-
-pairs(datasetadj)
 
 #Plot dataset for analysis
 ggpairs(datasetadj)
@@ -402,8 +402,6 @@ k$cluster <- as.factor(k$cluster)
 ggplot(x, aes(datasetadj[,f1], datasetadj[,f2], color = k$cluster)) + geom_point() + labs(x = colnames(datasetadj)[f1], y = colnames(datasetadj)[f2], color = "cluster")
 
 ##End of clustering
-
-pairs(datasetadj, col=ifelse(datasetadj$gender==0, "red", "blue"))
 
 #PCA
 #Exclude supplementary qualitative variable from the PCA (naming Gender and Search Radius)

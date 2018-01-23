@@ -1,4 +1,9 @@
-####R-Script for analysing the given dataset####
+#This R-Script is about the data-analysis of the dataset
+#provided by group 1. 
+#To run it, first execute lines 8-26 to install all needed
+#packages. Then load all the functions of the "functions" section.
+#Afterwards jump to the main part and execute it line by line.
+#The comments describe what each line does.
 
 #Import libraries
 install.packages("GGally")

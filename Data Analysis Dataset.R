@@ -70,15 +70,6 @@ detectoutx <- function(data){
 }
 
 #1.4 Outlier removal#
-#This function removes NA values from the dataset
-naremoval <- function(data){
-  for(i in 1:nrow(data)){
-    if(any(is.na(data[i,]))){
-      data = data[-i,]
-    }
-  }
-  return(data)
-}
 
 #This functions identifies univariate outliers based on standardized values (>3.5) and multivariate outliers (based on Chi-square test)
 #Univariate outliers are replaced by applying knn imputation 
@@ -200,19 +191,6 @@ dbscan_plot = function(data, f1, f2, eps = .5, minpts = 10){
   colnames(x) <- c(colnames(data)[f1], colnames(data)[f2])
   db <- dbscan(x, eps = eps, minPts = minpts)
   ggplot(x, aes(data[,f1], data[,f2], color = db$cluster)) + geom_point()
-}
-
-#function to remove observations with a certain value in a certain row
-removeValue <- function(data,l,v){
-  k = 1
-  while(k <= nrow(data)){
-    if(data[k,l] == v){
-      data = data[-k,]
-    }else{
-      k = k+1
-    }
-  }
-  return(data)
 }
 
 ######### end of function declaration ############
